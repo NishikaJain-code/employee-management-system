@@ -10,6 +10,9 @@ import DepartmentMaster from "./pages/DepartmentMaster";
 import SkillsMaster from "./pages/SkillsMaster";
 import Profile from "./pages/Profile";
 import UploadFiles from "./pages/UploadFiles";
+import LeaveApplication from "./pages/LeaveApplication";
+import LeaveApproval from "./pages/LeaveApproval";
+import HRApproval from "./pages/HRApproval";
 
 function App() {
   return (
@@ -35,6 +38,18 @@ function App() {
 
         <Route path="/profile" element={<Profile />} />
         <Route path="/upload" element={<UploadFiles />} />
+        <Route
+  path="/leave-approval"
+  element={<LeaveApproval />}
+/>
+        <Route
+  path="/apply-leave"
+  element={<LeaveApplication />}
+/>
+<Route
+  path="/hr-approval"
+  element={<HRApproval />}
+/>
 
       </Routes>
 

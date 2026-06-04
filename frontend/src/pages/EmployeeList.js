@@ -40,6 +40,7 @@ function EmployeeList() {
             <th>Name</th>
             <th>Email</th>
             <th>Department</th>
+            
           </tr>
         </thead>
 
@@ -52,6 +53,7 @@ function EmployeeList() {
               <td>{emp.name}</td>
               <td>{emp.email}</td>
               <td>{emp.department}</td>
+              
             </tr>
 
           ))}

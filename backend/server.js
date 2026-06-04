@@ -8,6 +8,7 @@ app.use(express.json());
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/employee", require("./routes/employee"));
+app.use("/api/leave", require("./routes/leave"));
 app.get("/", (req, res) => {
   res.send("Server Running");
 });
