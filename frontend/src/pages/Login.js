@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 
 function Login() {
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -15,9 +16,11 @@ function Login() {
   };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
     try {
+
       const res = await axios.post(
         "http://localhost:5000/api/auth/login",
         formData
@@ -26,16 +29,27 @@ function Login() {
       localStorage.setItem("token", res.data.token);
 
       alert(res.data.message);
+
     } catch (err) {
-      alert(err.response.data.message);
+
+      console.log(err);
+
+      if (err.response && err.response.data.message) {
+        alert(err.response.data.message);
+      } else {
+        alert("Something went wrong");
+      }
+
     }
   };
 
   return (
     <div style={{ padding: "40px" }}>
+
       <h1>Login</h1>
 
       <form onSubmit={handleSubmit}>
+
         <input
           type="email"
           name="email"
@@ -56,8 +70,12 @@ function Login() {
         <br />
         <br />
 
-        <button type="submit">Login</button>
+        <button type="submit">
+          Login
+        </button>
+
       </form>
+
     </div>
   );
 }

@@ -3,7 +3,12 @@ const router = express.Router();
 const pool = require("../config/db");
 const multer = require("multer");
 
+
+
+// ================= MULTER =================
+
 const storage = multer.diskStorage({
+
   destination: function (req, file, cb) {
     cb(null, "uploads/");
   },
@@ -11,43 +16,64 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     cb(null, Date.now() + "-" + file.originalname);
   },
+
 });
 
 const upload = multer({
   storage: storage,
 });
+
+
+
 // ================= DEPARTMENTS =================
 
 // GET Departments
 router.get("/departments", async (req, res) => {
+
   try {
+
     const departments = await pool.query(
       "SELECT * FROM departments ORDER BY id"
     );
 
     res.json(departments.rows);
+
   } catch (err) {
+
     console.log(err);
+
   }
+
 });
+
 
 
 // POST Department
 router.post("/departments", async (req, res) => {
+
   try {
+
     const { name } = req.body;
 
     await pool.query(
-      "INSERT INTO departments(name) VALUES($1)",
+      "INSERT INTO departments(department_name) VALUES($1)",
       [name]
     );
 
     res.json({
       message: "Department Added",
     });
+
   } catch (err) {
+
     console.log(err);
+
+    res.status(500).json({
+      message: err.message
+    });
+
   }
+
 });
 
 
@@ -56,34 +82,51 @@ router.post("/departments", async (req, res) => {
 
 // GET Skills
 router.get("/skills", async (req, res) => {
+
   try {
+
     const skills = await pool.query(
       "SELECT * FROM skills ORDER BY id"
     );
 
     res.json(skills.rows);
+
   } catch (err) {
+
     console.log(err);
+
   }
+
 });
+
 
 
 // POST Skill
 router.post("/skills", async (req, res) => {
+
   try {
+
     const { name } = req.body;
 
     await pool.query(
-      "INSERT INTO skills(name) VALUES($1)",
+      "INSERT INTO skills(skill_name) VALUES($1)",
       [name]
     );
 
     res.json({
       message: "Skill Added",
     });
+
   } catch (err) {
+
     console.log(err);
+
+    res.status(500).json({
+      message: err.message
+    });
+
   }
+
 });
 
 
@@ -92,8 +135,12 @@ router.post("/skills", async (req, res) => {
 
 // CREATE Employee
 router.post("/employees", async (req, res) => {
+
   try {
+
     const { name, email, department_id } = req.body;
+
+    console.log(req.body);
 
     await pool.query(
       `
@@ -106,37 +153,60 @@ router.post("/employees", async (req, res) => {
     res.json({
       message: "Employee Added",
     });
+
   } catch (err) {
+
     console.log(err);
+
+    res.status(500).json({
+      message: "Backend Error",
+      error: err.message,
+    });
+
   }
+
 });
 
 
 
 // GET ALL Employees
 router.get("/employees", async (req, res) => {
+
   try {
-    const employees = await pool.query(
-      `
-      SELECT employees.*, departments.name AS department
-      FROM employees
-      LEFT JOIN departments
-      ON employees.department_id = departments.id
-      ORDER BY employees.id
-      `
-    );
+
+    const employees = await pool.query(`
+      SELECT
+      e.id,
+      e.name,
+      e.email,
+      d.department_name AS department
+      FROM employees e
+      LEFT JOIN departments d
+      ON e.department_id = d.id
+      ORDER BY e.id
+    `);
 
     res.json(employees.rows);
+
   } catch (err) {
+
     console.log(err);
+
+    res.status(500).json({
+      message: err.message
+    });
+
   }
+
 });
 
 
 
 // GET Employee By ID
 router.get("/employees/:id", async (req, res) => {
+
   try {
+
     const { id } = req.params;
 
     const employee = await pool.query(
@@ -151,16 +221,22 @@ router.get("/employees/:id", async (req, res) => {
     );
 
     res.json(employee.rows[0]);
+
   } catch (err) {
+
     console.log(err);
+
   }
+
 });
 
 
 
 // UPDATE Employee
 router.put("/employees/:id", async (req, res) => {
+
   try {
+
     const { id } = req.params;
 
     const { name, email, department_id } = req.body;
@@ -177,16 +253,22 @@ router.put("/employees/:id", async (req, res) => {
     res.json({
       message: "Employee Updated",
     });
+
   } catch (err) {
+
     console.log(err);
+
   }
+
 });
 
 
 
 // DELETE Employee
 router.delete("/employees/:id", async (req, res) => {
+
   try {
+
     const { id } = req.params;
 
     await pool.query(
@@ -197,27 +279,47 @@ router.delete("/employees/:id", async (req, res) => {
     res.json({
       message: "Employee Deleted",
     });
+
   } catch (err) {
+
     console.log(err);
+
   }
+
 });
+
+
+
+// ================= FILE UPLOAD =================
 
 router.post(
   "/employees/upload",
   upload.array("files", 5),
+
   async (req, res) => {
+
     try {
+
       res.json({
         message: "Files Uploaded Successfully",
         files: req.files,
       });
+
     } catch (err) {
+
       console.log(err);
+
     }
+
   }
 );
 
+
+
+// ================= DASHBOARD =================
+
 router.get("/dashboard", async (req, res) => {
+
   try {
 
     const employees = await pool.query(
@@ -232,9 +334,13 @@ router.get("/dashboard", async (req, res) => {
       "SELECT COUNT(*) FROM skills"
     );
 
-    const images = await pool.query(
-      "SELECT COUNT(profile_image) FROM employees"
-    );
+    const images = {
+  rows: [
+    {
+      count: 0
+    }
+  ]
+};
 
     res.json({
       totalEmployees: employees.rows[0].count,
@@ -244,7 +350,12 @@ router.get("/dashboard", async (req, res) => {
     });
 
   } catch (err) {
+
     console.log(err);
+
   }
+
 });
+
+
 module.exports = router;

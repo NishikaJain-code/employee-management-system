@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 
 function Signup() {
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,26 +17,38 @@ function Signup() {
   };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
     try {
+
       const res = await axios.post(
         "http://localhost:5000/api/auth/signup",
         formData
       );
 
       alert(res.data.message);
+
     } catch (err) {
+
       console.log(err);
-alert("Signup failed");
+
+      if (err.response && err.response.data.message) {
+        alert(err.response.data.message);
+      } else {
+        alert("Something went wrong");
+      }
+
     }
   };
 
   return (
     <div style={{ padding: "40px" }}>
+
       <h1>Signup</h1>
 
       <form onSubmit={handleSubmit}>
+
         <input
           type="text"
           name="name"
@@ -66,8 +79,12 @@ alert("Signup failed");
         <br />
         <br />
 
-        <button type="submit">Signup</button>
+        <button type="submit">
+          Signup
+        </button>
+
       </form>
+
     </div>
   );
 }
