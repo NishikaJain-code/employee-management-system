@@ -9,6 +9,7 @@ import EditEmployee from "./pages/EditEmployee";
 import DepartmentMaster from "./pages/DepartmentMaster";
 import SkillsMaster from "./pages/SkillsMaster";
 import Profile from "./pages/Profile";
+import UploadFiles from "./pages/UploadFiles";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/skills" element={<SkillsMaster />} />
 
         <Route path="/profile" element={<Profile />} />
+        <Route path="/upload" element={<UploadFiles />} />
 
       </Routes>
 
