@@ -488,6 +488,8 @@
         const uRes = await fetch(`${API_BASE_URL}/auth/user`, { headers: { Authorization: token } });
         if (!uRes.ok) return;
         const userData = await uRes.json();
+        console.log("userData =", userData);
+console.log("employee_profile_id =", userData.employee_profile_id);
         myProfileId = userData.employee_profile_id;
         if (!myProfileId) { showAlert("No employee profile found for your account.", "danger"); return; }
         document.getElementById("profileIdField").value = myProfileId;
@@ -540,6 +542,7 @@
         payload.salary = parseFloat(document.getElementById("profileSalary").value);
       }
       try {
+        console.log("Profile ID =", id);
         const res = await fetch(`${API_BASE_URL}/employees/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json", Authorization: token },
