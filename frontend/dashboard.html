@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMS - Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="dashboard-header">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div style="width:36px;height:36px;background:rgba(59,130,246,0.2);border:1px solid rgba(59,130,246,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;">🏢</div>
+      <h1>EMS Portal</h1>
+    </div>
+    <div class="header-user-info">
+      <span style="font-size:14px;color:#94a3b8;">Signed in as <strong id="headerUserName" style="color:#fff;">User</strong></span>
+      <span class="badge" id="headerUserRole">Role</span>
+      <a href="#" class="logout-link" id="logoutBtn">Sign Out</a>
+    </div>
+  </header>
+
+  <!-- MAIN WRAPPER -->
+  <div class="dashboard-wrapper">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <ul class="sidebar-menu">
+        <li><a href="#" class="active" id="navSummary"><span>📊</span> Dashboard</a></li>
+        <li><a href="#" id="navProfile"><span>👤</span> My Profile</a></li>
+        <li><a href="#" id="navLeaves"><span>📋</span> Leave Management</a></li>
+        <li class="manager-hr-admin-only"><a href="#" id="navEmployees"><span>👥</span> Employee Directory</a></li>
+        <li class="manager-hr-admin-only"><a href="#" id="navReports"><span>📈</span> Reports & Analytics</a></li>
+        <li class="admin-hr-only"><a href="#" id="navMasters"><span>⚙️</span> Admin Masters</a></li>
+      </ul>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <main class="main-content">
+      <div id="alertPlaceholder"></div>
+
+      <!-- SECTION 1: DASHBOARD SUMMARY -->
+      <section id="sectionSummary" class="dashboard-panel">
+        <div class="welcome-banner">
+          <h2 id="welcomeTitle">Good day! 👋</h2>
+          <p>Welcome to the Employee Management & Leave Approval System. Use the sidebar to navigate to your tasks.</p>
+        </div>
+
+        <!-- Analytics Cards (Manager/HR/Admin) -->
+        <div id="analyticsCardsContainer" style="display:none;">
+          <p style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">Key Metrics</p>
+          <div class="stats-grid">
+            <div class="stat-card blue">
+              <h3>Total Employees</h3>
+              <p id="statTotalEmployees">—</p>
+            </div>
+            <div class="stat-card green">
+              <h3>Departments</h3>
+              <p id="statTotalDepartments">—</p>
+            </div>
+            <div class="stat-card orange">
+              <h3>Skills Available</h3>
+              <p id="statTotalSkills">—</p>
+            </div>
+            <div class="stat-card red">
+              <h3>Total Salary Expense</h3>
+              <p id="statTotalSalary">—</p>
+            </div>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-card orange">
+              <h3>Pending Leaves</h3>
+              <p id="statPendingLeaves">—</p>
+            </div>
+            <div class="stat-card green">
+              <h3>Approved Leaves</h3>
+              <p id="statApprovedLeaves">—</p>
+            </div>
+            <div class="stat-card red">
+              <h3>Rejected Leaves</h3>
+              <p id="statRejectedLeaves">—</p>
+            </div>
+            <div class="stat-card blue">
+              <h3>Uploaded Documents</h3>
+              <p id="statTotalImages">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- My Leave Balances -->
+        <div class="dashboard-section">
+          <h2>My Leave Balances</h2>
+          <div class="stats-grid" id="myBalancesGrid">
+            <p style="color:#64748b;font-size:14px;">Loading...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: MY PROFILE -->
+      <section id="sectionProfile" class="dashboard-panel" style="display:none;">
+        <div class="dashboard-section">
+          <h2>Update My Profile</h2>
+          <form id="profileForm">
+            <input type="hidden" id="profileIdField">
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Designation</label>
+                <input type="text" id="profileDesignation" class="form-control" placeholder="e.g. React Developer">
+              </div>
+              <div class="form-group">
+                <label>Monthly Salary (Rs.)</label>
+                <input type="number" id="profileSalary" class="form-control" placeholder="e.g. 50000" disabled>
+                <p style="font-size:12px;color:#64748b;margin-top:6px;">Editable only by Admin / HR</p>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" id="profilePhone" class="form-control" placeholder="9876543210">
+              </div>
+              <div class="form-group">
+                <label>Department</label>
+                <select id="profileDepartment" class="form-control">
+                  <option value="">Select Department</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Residential Address</label>
+              <textarea id="profileAddress" class="form-control" rows="3" placeholder="Enter your full address"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Skills (Hold Ctrl / Cmd to select multiple)</label>
+              <select id="profileSkills" class="form-control" multiple style="height:130px;"></select>
+            </div>
+            <button type="submit" class="btn" style="width:auto;padding:12px 32px;">Save Profile</button>
+          </form>
+        </div>
+
+        <!-- Document Upload -->
+        <div class="dashboard-section">
+          <h2>Document Uploads</h2>
+          <p style="font-size:14px;color:#94a3b8;margin-bottom:20px;">Upload up to 5 images — profile photo, Aadhar card, resume screenshot, or certificate. (Max 5MB each, .jpg/.jpeg/.png/.gif only)</p>
+          <form id="documentUploadForm">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <input type="file" id="documentFiles" class="form-control" style="flex:1;min-width:200px;" multiple accept="image/*">
+              <button type="submit" class="btn btn-secondary" style="width:auto;white-space:nowrap;padding:12px 24px;">Upload Files</button>
+            </div>
+          </form>
+          <div class="profile-images-container" id="profileImagesGrid" style="margin-top:20px;"></div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: LEAVE MANAGEMENT -->
+      <section id="sectionLeaves" class="dashboard-panel" style="display:none;">
+
+        <!-- Apply for Leave -->
+        <div class="dashboard-section">
+          <h2>Apply for Leave</h2>
+          <form id="applyLeaveForm">
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Leave Type</label>
+                <select id="leaveTypeField" class="form-control" required>
+                  <option value="">Select Leave Type</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Number of Days</label>
+                <input type="number" id="leaveDaysField" class="form-control" min="1" placeholder="e.g. 3" required>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>From Date</label>
+                <input type="date" id="leaveFromField" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label>To Date</label>
+                <input type="date" id="leaveToField" class="form-control" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Reason for Leave</label>
+              <textarea id="leaveReasonField" class="form-control" rows="2" placeholder="State your reason for leave request" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success" style="width:auto;padding:12px 32px;">Submit Application</button>
+          </form>
+        </div>
+
+        <!-- Pending Reviews (Manager/HR/Admin) -->
+        <div class="dashboard-section manager-hr-admin-only" id="leaveReviewsContainer" style="display:none;">
+          <h2>Pending Leave Requests</h2>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Leave Type</th>
+                  <th>Dates</th>
+                  <th>Days</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>Remarks</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="pendingLeavesTableBody">
+                <tr><td colspan="8" style="text-align:center;color:#64748b;padding:30px;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- My Leave History -->
+        <div class="dashboard-section">
+          <h2>My Leave History</h2>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Leave Type</th>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Days</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>Applied On</th>
+                </tr>
+              </thead>
+              <tbody id="myLeaveHistoryTableBody">
+                <tr><td colspan="7" style="text-align:center;color:#64748b;padding:30px;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: EMPLOYEE DIRECTORY -->
+      <section id="sectionEmployees" class="dashboard-panel" style="display:none;">
+        <div class="dashboard-section">
+          <h2>Employee Directory</h2>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Department</th>
+                  <th>Designation</th>
+                  <th>Phone</th>
+                  <th>Salary</th>
+                  <th>Skills</th>
+                  <th>Docs</th>
+                  <th class="admin-hr-only">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="employeesTableBody">
+                <tr><td colspan="10" style="text-align:center;color:#64748b;padding:30px;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 5: REPORTS -->
+      <section id="sectionReports" class="dashboard-panel" style="display:none;">
+        <div class="grid-2">
+          <div class="dashboard-section">
+            <h2>Department Headcount</h2>
+            <div class="table-responsive">
+              <table>
+                <thead><tr><th>Department</th><th>Employees</th></tr></thead>
+                <tbody id="reportDeptWiseBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="dashboard-section">
+            <h2>Most Absent Employees</h2>
+            <div class="table-responsive">
+              <table>
+                <thead><tr><th>Employee</th><th>Designation</th><th>Days Absent</th></tr></thead>
+                <tbody id="reportAbsencesBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-section">
+          <h2>Leave Category Usage</h2>
+          <div class="table-responsive">
+            <table>
+              <thead><tr><th>Leave Type</th><th>Applications</th><th>Total Days Granted</th></tr></thead>
+              <tbody id="reportLeaveTypeBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 6: ADMIN MASTERS -->
+      <section id="sectionMasters" class="dashboard-panel" style="display:none;">
+        <div class="grid-2">
+          <div class="dashboard-section">
+            <h2>Add Department</h2>
+            <form id="masterDeptForm">
+              <div class="form-group">
+                <label>Department Name</label>
+                <input type="text" id="masterDeptName" class="form-control" placeholder="e.g. Cybersecurity" required>
+              </div>
+              <button type="submit" class="btn" style="width:auto;padding:10px 24px;">Add Department</button>
+            </form>
+          </div>
+          <div class="dashboard-section">
+            <h2>Add Skill Tag</h2>
+            <form id="masterSkillForm">
+              <div class="form-group">
+                <label>Skill Name</label>
+                <input type="text" id="masterSkillName" class="form-control" placeholder="e.g. AWS Cloud" required>
+              </div>
+              <button type="submit" class="btn btn-secondary" style="width:auto;padding:10px 24px;">Add Skill</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    const API_BASE_URL = "http://localhost:5000/api";
+    const token = localStorage.getItem("token");
+    const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+
+    // Auth guard
+    if (!token || !currentUser) {
+      window.location.href = "index.html";
+    }
+
+    const role = currentUser ? currentUser.role : "";
+
+    // Set header info
+    document.getElementById("headerUserName").innerText = currentUser.name;
+    document.getElementById("headerUserRole").innerText = role.toUpperCase();
+    document.getElementById("welcomeTitle").innerText = "Good day, " + currentUser.name + "! 👋";
+
+    // Apply role-based visibility
+    if (role === "employee") {
+      document.querySelectorAll(".manager-hr-admin-only").forEach(el => el.style.display = "none");
+      document.querySelectorAll(".admin-hr-only").forEach(el => el.style.display = "none");
+    } else if (role === "manager") {
+      document.querySelectorAll(".manager-hr-admin-only").forEach(el => el.style.display = "block");
+      document.querySelectorAll(".admin-hr-only").forEach(el => el.style.display = "none");
+    } else if (role === "hr") {
+      document.querySelectorAll(".manager-hr-admin-only").forEach(el => el.style.display = "block");
+      document.querySelectorAll(".admin-hr-only").forEach(el => el.style.display = "block");
+      const salaryField = document.getElementById("profileSalary");
+      if (salaryField) salaryField.disabled = false;
+    } else if (role === "admin") {
+      document.querySelectorAll(".manager-hr-admin-only").forEach(el => el.style.display = "block");
+      document.querySelectorAll(".admin-hr-only").forEach(el => el.style.display = "block");
+      const salaryField = document.getElementById("profileSalary");
+      if (salaryField) salaryField.disabled = false;
+    }
+
+    // Logout
+    document.getElementById("logoutBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.clear();
+      window.location.href = "index.html";
+    });
+
+    // Alert helper
+    function showAlert(message, type = "danger") {
+      const el = document.getElementById("alertPlaceholder");
+      el.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+      setTimeout(() => { el.innerHTML = ""; }, 5000);
+    }
+
+    // Sidebar navigation
+    const navMap = [
+      { btn: "navSummary",   section: "sectionSummary" },
+      { btn: "navProfile",   section: "sectionProfile" },
+      { btn: "navLeaves",    section: "sectionLeaves" },
+      { btn: "navEmployees", section: "sectionEmployees" },
+      { btn: "navReports",   section: "sectionReports" },
+      { btn: "navMasters",   section: "sectionMasters" }
+    ];
+
+    navMap.forEach(nav => {
+      const btnEl = document.getElementById(nav.btn);
+      if (!btnEl) return;
+      btnEl.addEventListener("click", (e) => {
+        e.preventDefault();
+        navMap.forEach(n => {
+          const b = document.getElementById(n.btn);
+          if (b) b.classList.remove("active");
+          const s = document.getElementById(n.section);
+          if (s) s.style.display = "none";
+        });
+        btnEl.classList.add("active");
+        const sec = document.getElementById(nav.section);
+        if (sec) sec.style.display = "block";
+        loadSection(nav.section);
+      });
+    });
+
+    function loadSection(id) {
+      if (id === "sectionSummary")   loadSummary();
+      if (id === "sectionProfile")   loadProfileForm();
+      if (id === "sectionLeaves")    loadLeavesSection();
+      if (id === "sectionEmployees") loadEmployeeDirectory();
+      if (id === "sectionReports")   loadReports();
+    }
+
+    // ───────────────────────────────────────────────
+    // SUMMARY
+    // ───────────────────────────────────────────────
+    async function loadSummary() {
+      // Leave balances for current user
+      try {
+        const res = await fetch(`${API_BASE_URL}/leaves/balance`, { headers: { Authorization: token } });
+        if (res.ok) {
+          const balances = await res.json();
+          const grid = document.getElementById("myBalancesGrid");
+          if (balances.length === 0) {
+            grid.innerHTML = "<p style='color:#64748b;font-size:14px;'>No leave balances found.</p>";
+          } else {
+            grid.innerHTML = balances.map(b => `
+              <div class="stat-card blue">
+                <h3>${b.leave_name}</h3>
+                <p>${b.available_days}<span style="font-size:15px;font-weight:400;color:#94a3b8;"> / ${b.max_days} days</span></p>
+              </div>`).join("");
+          }
+        }
+      } catch (err) { console.error(err); }
+
+      // Analytics for managers/hr/admin
+      if (["admin", "hr", "manager"].includes(role)) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/leaves/reports`, { headers: { Authorization: token } });
+          if (res.ok) {
+            const { summary: s } = await res.json();
+            document.getElementById("statTotalEmployees").innerText = s.totalEmployees;
+            document.getElementById("statTotalDepartments").innerText = s.totalDepartments;
+            document.getElementById("statTotalSkills").innerText = s.totalSkills;
+            document.getElementById("statTotalSalary").innerText = "Rs. " + Number(s.totalSalaryExpense).toLocaleString();
+            document.getElementById("statPendingLeaves").innerText = s.pendingLeaves;
+            document.getElementById("statApprovedLeaves").innerText = s.approvedLeaves;
+            document.getElementById("statRejectedLeaves").innerText = s.rejectedLeaves;
+            document.getElementById("statTotalImages").innerText = s.totalImages;
+            document.getElementById("analyticsCardsContainer").style.display = "block";
+          }
+        } catch (err) { console.error(err); }
+      }
+    }
+
+    // ───────────────────────────────────────────────
+    // MASTER DROPDOWNS
+    // ───────────────────────────────────────────────
+    async function loadMastersDropdowns() {
+      try {
+        const dRes = await fetch(`${API_BASE_URL}/departments`, { headers: { Authorization: token } });
+        if (dRes.ok) {
+          const depts = await dRes.json();
+          const sel = document.getElementById("profileDepartment");
+          sel.innerHTML = '<option value="">Select Department</option>';
+          depts.forEach(d => { sel.innerHTML += `<option value="${d.id}">${d.department_name}</option>`; });
+        }
+        const sRes = await fetch(`${API_BASE_URL}/skills`, { headers: { Authorization: token } });
+        if (sRes.ok) {
+          const skills = await sRes.json();
+          const sel = document.getElementById("profileSkills");
+          sel.innerHTML = "";
+          skills.forEach(s => { sel.innerHTML += `<option value="${s.id}">${s.skill_name}</option>`; });
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    // ───────────────────────────────────────────────
+    // PROFILE
+    // ───────────────────────────────────────────────
+    let myProfileId = null;
+
+    async function loadProfileForm() {
+      await loadMastersDropdowns();
+      try {
+        const uRes = await fetch(`${API_BASE_URL}/auth/user`, { headers: { Authorization: token } });
+        if (!uRes.ok) return;
+        const userData = await uRes.json();
+        myProfileId = userData.employee_profile_id;
+        if (!myProfileId) { showAlert("No employee profile found for your account.", "danger"); return; }
+        document.getElementById("profileIdField").value = myProfileId;
+
+        const eRes = await fetch(`${API_BASE_URL}/employees/${myProfileId}`, { headers: { Authorization: token } });
+        if (!eRes.ok) return;
+        const emp = await eRes.json();
+
+        document.getElementById("profileDesignation").value = emp.designation || "";
+        document.getElementById("profileSalary").value = emp.salary || 0;
+        document.getElementById("profilePhone").value = emp.phone || "";
+        document.getElementById("profileDepartment").value = emp.department_id || "";
+        document.getElementById("profileAddress").value = emp.address || "";
+
+        const skillSel = document.getElementById("profileSkills");
+        const mySkillIds = emp.skills.map(s => s.id);
+        for (let opt of skillSel.options) {
+          opt.selected = mySkillIds.includes(parseInt(opt.value));
+        }
+
+        renderImages(emp.images);
+      } catch (err) { showAlert("Failed to load profile.", "danger"); }
+    }
+
+    function renderImages(images) {
+      const c = document.getElementById("profileImagesGrid");
+      if (!images || images.length === 0) {
+        c.innerHTML = "<p style='color:#64748b;font-size:14px;'>No documents uploaded yet.</p>";
+        return;
+      }
+      c.innerHTML = images.map(img => `
+        <a href="http://localhost:5000${img.image_url}" target="_blank">
+          <img src="http://localhost:5000${img.image_url}" class="profile-image-thumb" title="Click to open">
+        </a>`).join("");
+    }
+
+    document.getElementById("profileForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("profileIdField").value;
+      const skillSel = document.getElementById("profileSkills");
+      const skills = Array.from(skillSel.selectedOptions).map(o => parseInt(o.value));
+      const payload = {
+        designation: document.getElementById("profileDesignation").value,
+        phone: document.getElementById("profilePhone").value,
+        department_id: parseInt(document.getElementById("profileDepartment").value) || null,
+        address: document.getElementById("profileAddress").value,
+        skills
+      };
+      if (["admin", "hr"].includes(role)) {
+        payload.salary = parseFloat(document.getElementById("profileSalary").value);
+      }
+      try {
+        const res = await fetch(`${API_BASE_URL}/employees/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: token },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        res.ok ? showAlert(data.message, "success") : showAlert(data.message || "Update failed.", "danger");
+        if (res.ok) loadProfileForm();
+      } catch (err) { showAlert("Failed to update profile.", "danger"); }
+    });
+
+    document.getElementById("documentUploadForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!myProfileId) { showAlert("Load your profile first.", "danger"); return; }
+      const filesInput = document.getElementById("documentFiles");
+      if (!filesInput.files.length) { showAlert("Please select files to upload.", "danger"); return; }
+      const formData = new FormData();
+      for (let f of filesInput.files) formData.append("photos", f);
+      try {
+        const res = await fetch(`${API_BASE_URL}/employees/${myProfileId}/upload`, {
+          method: "POST",
+          headers: { Authorization: token },
+          body: formData
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showAlert(data.message, "success");
+          filesInput.value = "";
+          loadProfileForm();
+        } else {
+          showAlert(data.message || "Upload failed.", "danger");
+        }
+      } catch (err) { showAlert("Upload failed. Check server connection.", "danger"); }
+    });
+
+    // ───────────────────────────────────────────────
+    // LEAVES
+    // ───────────────────────────────────────────────
+    async function loadLeavesSection() {
+      // Load leave types dropdown
+      try {
+        const res = await fetch(`${API_BASE_URL}/leaves/types`, { headers: { Authorization: token } });
+        if (res.ok) {
+          const types = await res.json();
+          const sel = document.getElementById("leaveTypeField");
+          sel.innerHTML = '<option value="">Select Leave Type</option>';
+          types.forEach(t => { sel.innerHTML += `<option value="${t.id}">${t.leave_name}</option>`; });
+        }
+      } catch (err) { console.error(err); }
+
+      // Load my history
+      try {
+        const res = await fetch(`${API_BASE_URL}/leaves/history`, { headers: { Authorization: token } });
+        if (res.ok) {
+          const history = await res.json();
+          const tbody = document.getElementById("myLeaveHistoryTableBody");
+          if (history.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='7' style='text-align:center;color:#64748b;padding:30px;'>No leave applications yet.</td></tr>";
+          } else {
+            tbody.innerHTML = history.map(h => {
+              const cls = h.status === "Approved" ? "approved" : h.status === "Rejected" ? "rejected" : "pending";
+              return `<tr>
+                <td><strong>${h.leave_name}</strong></td>
+                <td>${new Date(h.from_date).toLocaleDateString()}</td>
+                <td>${new Date(h.to_date).toLocaleDateString()}</td>
+                <td>${h.total_days}</td>
+                <td style="max-width:150px;">${h.reason || "—"}</td>
+                <td><span class="status-badge ${cls}">${h.status}</span></td>
+                <td>${new Date(h.created_at).toLocaleDateString()}</td>
+              </tr>`;
+            }).join("");
+          }
+        }
+      } catch (err) { console.error(err); }
+
+      // Pending reviews for manager/hr/admin
+      if (["admin", "hr", "manager"].includes(role)) {
+        document.getElementById("leaveReviewsContainer").style.display = "block";
+        loadPendingReviews();
+      }
+    }
+
+    async function loadPendingReviews() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/leaves/pending`, { headers: { Authorization: token } });
+        if (res.ok) {
+          const items = await res.json();
+          const tbody = document.getElementById("pendingLeavesTableBody");
+          if (items.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='8' style='text-align:center;color:#64748b;padding:30px;'>No pending requests.</td></tr>";
+          } else {
+            tbody.innerHTML = items.map(p => `
+              <tr id="leave-row-${p.id}">
+                <td><strong>${p.employee_name}</strong><br><span style="font-size:12px;color:#64748b;">${p.designation || ""}</span></td>
+                <td>${p.leave_name}</td>
+                <td style="font-size:13px;">${new Date(p.from_date).toLocaleDateString()} - ${new Date(p.to_date).toLocaleDateString()}</td>
+                <td>${p.total_days}</td>
+                <td style="max-width:140px;font-size:13px;">${p.reason || "—"}</td>
+                <td><span class="status-badge pending">Pending</span></td>
+                <td><input type="text" id="rem-${p.id}" class="form-control" style="padding:8px;font-size:12px;" placeholder="Remarks..."></td>
+                <td>
+                  <div style="display:flex;gap:6px;">
+                    <button class="btn btn-success" style="padding:6px 12px;font-size:12px;width:auto;" onclick="reviewLeave(${p.id},'approve')">Approve</button>
+                    <button class="btn btn-danger" style="padding:6px 12px;font-size:12px;width:auto;" onclick="reviewLeave(${p.id},'reject')">Reject</button>
+                  </div>
+                </td>
+              </tr>`).join("");
+          }
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    async function reviewLeave(id, action) {
+      const remarks = document.getElementById(`rem-${id}`).value;
+      try {
+        const res = await fetch(`${API_BASE_URL}/leaves/${action}/${id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: token },
+          body: JSON.stringify({ remarks })
+        });
+        const data = await res.json();
+        res.ok ? showAlert(data.message, "success") : showAlert(data.message || "Action failed.", "danger");
+        if (res.ok) loadPendingReviews();
+      } catch (err) { showAlert("Server error.", "danger"); }
+    }
+
+    document.getElementById("applyLeaveForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const payload = {
+        leave_type_id: parseInt(document.getElementById("leaveTypeField").value),
+        from_date: document.getElementById("leaveFromField").value,
+        to_date: document.getElementById("leaveToField").value,
+        total_days: parseInt(document.getElementById("leaveDaysField").value),
+        reason: document.getElementById("leaveReasonField").value
+      };
+      if (!payload.leave_type_id) { showAlert("Please select a leave type.", "danger"); return; }
+      try {
+        const res = await fetch(`${API_BASE_URL}/leaves/apply`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: token },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          showAlert(data.message, "success");
+          document.getElementById("applyLeaveForm").reset();
+          loadLeavesSection();
+        } else {
+          showAlert(data.message || "Failed to submit.", "danger");
+        }
+      } catch (err) { showAlert("Failed to submit leave application.", "danger"); }
+    });
+
+    // ───────────────────────────────────────────────
+    // EMPLOYEE DIRECTORY
+    // ───────────────────────────────────────────────
+    async function loadEmployeeDirectory() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/employees`, { headers: { Authorization: token } });
+        if (res.ok) {
+          const emps = await res.json();
+          const tbody = document.getElementById("employeesTableBody");
+          if (emps.length === 0) {
+            tbody.innerHTML = "<tr><td colspan='10' style='text-align:center;color:#64748b;padding:30px;'>No employees found.</td></tr>";
+            return;
+          }
+          tbody.innerHTML = emps.map(emp => {
+            const skillBadges = emp.skills.map(s => `<span class="skill-tag">${s.skill_name}</span>`).join("");
+            const docLinks = emp.images.map((img, i) => `<a href="http://localhost:5000${img.image_url}" target="_blank" style="font-size:12px;color:#3b82f6;margin-right:5px;">Doc ${i+1}</a>`).join("");
+            const deleteBtn = ["admin", "hr"].includes(role)
+              ? `<td><button class="btn btn-danger" style="padding:6px 10px;font-size:12px;width:auto;" onclick="deleteEmp(${emp.profile_id})">Delete</button></td>`
+              : `<td style="color:#64748b;font-size:13px;">—</td>`;
+            return `<tr>
+              <td><strong>${emp.name}</strong></td>
+              <td style="font-size:13px;color:#94a3b8;">${emp.email}</td>
+              <td><span class="badge">${emp.role}</span></td>
+              <td>${emp.department_name || "—"}</td>
+              <td>${emp.designation || "—"}</td>
+              <td style="font-size:13px;">${emp.phone || "—"}</td>
+              <td>Rs.${Number(emp.salary || 0).toLocaleString()}</td>
+              <td>${skillBadges || "—"}</td>
+              <td>${docLinks || "—"}</td>
+              ${deleteBtn}
+            </tr>`;
+          }).join("");
+        }
+      } catch (err) { console.error(err); }
+    }
+
+    async function deleteEmp(profileId) {
+      if (!confirm("Delete this employee permanently? This cannot be undone.")) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/employees/${profileId}`, {
+          method: "DELETE", headers: { Authorization: token }
+        });
+        const data = await res.json();
+        res.ok ? showAlert(data.message, "success") : showAlert(data.message || "Delete failed.", "danger");
+        if (res.ok) loadEmployeeDirectory();
+      } catch (err) { showAlert("Server error.", "danger"); }
+    }
+
+    // ───────────────────────────────────────────────
+    // REPORTS
+    // ───────────────────────────────────────────────
+    async function loadReports() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/leaves/reports`, { headers: { Authorization: token } });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        document.getElementById("reportDeptWiseBody").innerHTML =
+          data.departmentWiseCount.map(d => `<tr><td><strong>${d.department_name}</strong></td><td>${d.total_employees}</td></tr>`).join("") ||
+          "<tr><td colspan='2' style='text-align:center;color:#64748b;'>No data.</td></tr>";
+
+        document.getElementById("reportAbsencesBody").innerHTML =
+          data.employeeAbsence.map(a => `<tr><td><strong>${a.name}</strong></td><td>${a.designation}</td><td>${a.total_absent_days} days</td></tr>`).join("") ||
+          "<tr><td colspan='3' style='text-align:center;color:#64748b;'>No absences logged.</td></tr>";
+
+        document.getElementById("reportLeaveTypeBody").innerHTML =
+          data.leaveTypeUsage.map(u => `<tr><td><strong>${u.leave_name}</strong></td><td>${u.total_applications}</td><td>${u.total_days_taken}</td></tr>`).join("") ||
+          "<tr><td colspan='3' style='text-align:center;color:#64748b;'>No data.</td></tr>";
+      } catch (err) { console.error(err); }
+    }
+
+    // ───────────────────────────────────────────────
+    // ADMIN MASTERS
+    // ───────────────────────────────────────────────
+    document.getElementById("masterDeptForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const department_name = document.getElementById("masterDeptName").value;
+      try {
+        const res = await fetch(`${API_BASE_URL}/departments`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: token },
+          body: JSON.stringify({ department_name })
+        });
+        const data = await res.json();
+        res.ok ? showAlert(data.message, "success") : showAlert(data.message || "Failed.", "danger");
+        if (res.ok) document.getElementById("masterDeptForm").reset();
+      } catch (err) { showAlert("Server error.", "danger"); }
+    });
+
+    document.getElementById("masterSkillForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const skill_name = document.getElementById("masterSkillName").value;
+      try {
+        const res = await fetch(`${API_BASE_URL}/skills`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: token },
+          body: JSON.stringify({ skill_name })
+        });
+        const data = await res.json();
+        res.ok ? showAlert(data.message, "success") : showAlert(data.message || "Failed.", "danger");
+        if (res.ok) document.getElementById("masterSkillForm").reset();
+      } catch (err) { showAlert("Server error.", "danger"); }
+    });
+
+    // Initial load
+    window.addEventListener("DOMContentLoaded", () => {
+      loadSummary();
+    });
+  </script>
+</body>
+</html>

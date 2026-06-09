@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMS - Employee Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="auth-container">
+
+    <!-- LOGIN CARD -->
+    <div class="auth-card" id="loginCard">
+      <div style="text-align:center; margin-bottom:30px;">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.3);border-radius:14px;margin-bottom:16px;">
+          <span style="font-size:26px;">🏢</span>
+        </div>
+        <h2>Welcome Back</h2>
+        <p style="color:#94a3b8;font-size:14px;margin-top:4px;">Sign in to your employee portal</p>
+      </div>
+
+      <div id="loginAlert"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="amit@isoftzone.com" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="Enter password" required>
+        </div>
+        <button type="submit" class="btn" id="loginBtn">Sign In</button>
+      </form>
+
+      <div class="auth-toggle">
+        Don't have an account? <a href="#" id="showSignup">Register here</a>
+      </div>
+
+      <div style="margin-top:25px;padding-top:20px;border-top:1px solid #334155;">
+        <p style="font-size:11px;color:#64748b;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.8px;font-weight:600;">Quick Test Logins (all use password: 123456)</p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <button class="quick-btn" onclick="fillLogin('pranay@isoftzone.com')">👑 Admin</button>
+          <button class="quick-btn" onclick="fillLogin('rahul@isoftzone.com')">🧑‍💼 Manager</button>
+          <button class="quick-btn" onclick="fillLogin('priya@isoftzone.com')">👩‍💼 HR</button>
+          <button class="quick-btn" onclick="fillLogin('amit@isoftzone.com')">👤 Employee</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIGNUP CARD -->
+    <div class="auth-card" id="signupCard" style="display:none;">
+      <div style="text-align:center;margin-bottom:30px;">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:14px;margin-bottom:16px;">
+          <span style="font-size:26px;">✨</span>
+        </div>
+        <h2>Create Account</h2>
+        <p style="color:#94a3b8;font-size:14px;margin-top:4px;">Register a new portal account</p>
+      </div>
+
+      <div id="signupAlert"></div>
+
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="signupName">Full Name</label>
+          <input type="text" id="signupName" class="form-control" placeholder="e.g. Priya Sharma" required>
+        </div>
+        <div class="form-group">
+          <label for="signupEmail">Email Address</label>
+          <input type="email" id="signupEmail" class="form-control" placeholder="priya@company.com" required>
+        </div>
+        <div class="form-group">
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" class="form-control" placeholder="Min 6 characters" minlength="6" required>
+        </div>
+        <div class="form-group">
+          <label for="signupRole">System Role</label>
+          <select id="signupRole" class="form-control">
+            <option value="employee">Employee</option>
+            <option value="manager">Manager</option>
+            <option value="hr">Human Resources (HR)</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </div>
+        <button type="submit" class="btn" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">Create Account</button>
+      </form>
+
+      <div class="auth-toggle">
+        Already have an account? <a href="#" id="showLogin">Sign in here</a>
+      </div>
+    </div>
+
+  </div>
+
+  <style>
+    .quick-btn {
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .quick-btn:hover {
+      border-color: #3b82f6;
+      color: #e2e8f0;
+      background: #1e293b;
+    }
+  </style>
+
+  <script>
+    const API_BASE_URL = "http://localhost:5000/api";
+
+    function fillLogin(email) {
+      document.getElementById("loginEmail").value = email;
+      document.getElementById("loginPassword").value = "123456";
+    }
+
+    document.getElementById("showSignup").addEventListener("click", (e) => {
+      e.preventDefault();
+      document.getElementById("loginCard").style.display = "none";
+      document.getElementById("signupCard").style.display = "block";
+    });
+
+    document.getElementById("showLogin").addEventListener("click", (e) => {
+      e.preventDefault();
+      document.getElementById("signupCard").style.display = "none";
+      document.getElementById("loginCard").style.display = "block";
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      const alertDiv = document.getElementById("loginAlert");
+      const btn = document.getElementById("loginBtn");
+
+      alertDiv.innerHTML = "";
+      btn.textContent = "Signing in...";
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+          alertDiv.innerHTML = `<div class="alert alert-success">Login successful! Redirecting...</div>`;
+          setTimeout(() => { window.location.href = "dashboard.html"; }, 900);
+        } else {
+          alertDiv.innerHTML = `<div class="alert alert-danger">${data.message || "Login failed."}</div>`;
+          btn.textContent = "Sign In";
+          btn.disabled = false;
+        }
+      } catch (err) {
+        alertDiv.innerHTML = `<div class="alert alert-danger">Cannot connect to server. Make sure the backend is running on port 5000.</div>`;
+        btn.textContent = "Sign In";
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("signupForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("signupName").value;
+      const email = document.getElementById("signupEmail").value;
+      const password = document.getElementById("signupPassword").value;
+      const role = document.getElementById("signupRole").value;
+      const alertDiv = document.getElementById("signupAlert");
+
+      alertDiv.innerHTML = "";
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password, role })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alertDiv.innerHTML = `<div class="alert alert-success">Registration successful! Please sign in.</div>`;
+          document.getElementById("signupForm").reset();
+          setTimeout(() => {
+            document.getElementById("signupCard").style.display = "none";
+            document.getElementById("loginCard").style.display = "block";
+            document.getElementById("loginEmail").value = email;
+            alertDiv.innerHTML = "";
+          }, 2000);
+        } else {
+          alertDiv.innerHTML = `<div class="alert alert-danger">${data.message || "Registration failed."}</div>`;
+        }
+      } catch (err) {
+        alertDiv.innerHTML = `<div class="alert alert-danger">Cannot connect to server. Ensure backend is running.</div>`;
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      if (localStorage.getItem("token")) {
+        window.location.href = "dashboard.html";
+      }
+    });
+  </script>
+</body>
+</html>
