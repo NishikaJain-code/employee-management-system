@@ -203,6 +203,40 @@ router.post("/approve/:id", verifyToken, authorize(["admin", "hr", "manager"]), 
 
     // Commit Transaction
     await client.query("COMMIT");
+
+    // Notification — best-effort (won't break if table missing)
+    try {
+      const empUserResult = await pool.query(
+        "SELECT user_id FROM employee_profiles WHERE id = $1",
+        [leave.employee_id]
+      );
+      if (empUserResult.rows.length > 0) {
+        await pool.query(
+          `INSERT INTO notifications (user_id, message, type, metadata)
+           VALUES ($1, $2, 'leave_approved', $3)`,
+          [
+            empUserResult.rows[0].user_id,
+            `Your leave application (${leave.total_days} day(s)) has been approved.`,
+            JSON.stringify({ leave_id: leaveId }),
+          ]
+        );
+      }
+    } catch (notifErr) {
+      console.warn("Leave approval notification failed:", notifErr.message);
+    }
+
+    // Audit log — best-effort
+    pool.query(
+      `INSERT INTO audit_logs (table_name, record_id, action, old_values, new_values, performed_by)
+       VALUES ('leave_applications', $1, 'UPDATE', $2, $3, $4)`,
+      [
+        leaveId,
+        JSON.stringify({ status: "Pending" }),
+        JSON.stringify({ status: "Approved", remarks: remarks || "Approved by manager" }),
+        req.user.id,
+      ]
+    ).catch((e) => console.warn("Audit log failed:", e.message));
+
     res.json({ message: "Leave approved successfully and balance updated!" });
   } catch (error) {
     await client.query("ROLLBACK");
@@ -257,6 +291,40 @@ router.post("/reject/:id", verifyToken, authorize(["admin", "hr", "manager"]), a
 
     // Commit Transaction
     await client.query("COMMIT");
+
+    // Notification — best-effort
+    try {
+      const empUserResult = await pool.query(
+        "SELECT user_id FROM employee_profiles WHERE id = $1",
+        [leave.employee_id]
+      );
+      if (empUserResult.rows.length > 0) {
+        await pool.query(
+          `INSERT INTO notifications (user_id, message, type, metadata)
+           VALUES ($1, $2, 'leave_rejected', $3)`,
+          [
+            empUserResult.rows[0].user_id,
+            `Your leave application (${leave.total_days} day(s)) has been rejected. Reason: ${remarks || "No reason provided"}.`,
+            JSON.stringify({ leave_id: leaveId }),
+          ]
+        );
+      }
+    } catch (notifErr) {
+      console.warn("Leave rejection notification failed:", notifErr.message);
+    }
+
+    // Audit log — best-effort
+    pool.query(
+      `INSERT INTO audit_logs (table_name, record_id, action, old_values, new_values, performed_by)
+       VALUES ('leave_applications', $1, 'UPDATE', $2, $3, $4)`,
+      [
+        leaveId,
+        JSON.stringify({ status: "Pending" }),
+        JSON.stringify({ status: "Rejected", remarks: remarks || "Rejected by manager" }),
+        req.user.id,
+      ]
+    ).catch((e) => console.warn("Audit log failed:", e.message));
+
     res.json({ message: "Leave rejected successfully." });
   } catch (error) {
     await client.query("ROLLBACK");

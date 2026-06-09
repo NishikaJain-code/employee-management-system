@@ -53,6 +53,7 @@ router.get("/", verifyToken, async (req, res) => {
         ep.address,
         ep.designation,
         ep.salary,
+        ep.profile_pic,
         ep.created_at,
         u.id AS user_id,
         u.name,
@@ -110,6 +111,7 @@ router.get("/:id", verifyToken, async (req, res) => {
         ep.address,
         ep.designation,
         ep.salary,
+        ep.profile_pic,
         ep.created_at,
         u.id AS user_id,
         u.name,
@@ -292,6 +294,46 @@ router.delete("/:id", verifyToken, authorize(["admin", "hr"]), async (req, res) 
   } catch (error) {
     console.error("Delete employee error:", error);
     res.status(500).json({ message: "Server error deleting employee.", error: error.message });
+  }
+});
+
+// @route   POST /api/employees/:id/profile-pic
+// @desc    Upload profile picture
+router.post("/:id/profile-pic", verifyToken, upload.single("profile_pic"), async (req, res) => {
+  try {
+    const profileId = req.params.id;
+
+    // Check authorization: User can only update their own profile, unless Admin/HR
+    const checkQuery = "SELECT user_id FROM employee_profiles WHERE id = $1";
+    const checkResult = await pool.query(checkQuery, [profileId]);
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ message: "Employee profile not found." });
+    }
+
+    const ownerUserId = checkResult.rows[0].user_id;
+    if (req.user.id !== ownerUserId && !["admin", "hr"].includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden. You can only upload a profile pic to your own profile." });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded." });
+    }
+
+    const imageUrl = `/uploads/${req.file.filename}`;
+
+    // Update profile_pic column
+    await pool.query(
+      "UPDATE employee_profiles SET profile_pic = $1 WHERE id = $2",
+      [imageUrl, profileId]
+    );
+
+    res.json({
+      message: "Profile picture uploaded successfully!",
+      profile_pic: imageUrl
+    });
+  } catch (error) {
+    console.error("Profile pic upload error:", error);
+    res.status(500).json({ message: "Server error uploading profile picture.", error: error.message });
   }
 });
 
