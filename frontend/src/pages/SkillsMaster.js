@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../utils/api";
 
 function SkillsMaster() {
 
@@ -14,9 +14,7 @@ function SkillsMaster() {
 
     try {
 
-      const res = await axios.get(
-        "http://localhost:5000/api/employee/skills"
-      );
+      const res = await api.get("/api/skills");
 
       setSkills(res.data);
 
@@ -32,10 +30,7 @@ function SkillsMaster() {
 
     try {
 
-      await axios.post(
-        "http://localhost:5000/api/employee/skills",
-        { name }
-      );
+      await api.post("/api/skills", { skill_name: name });
 
       alert("Skill Added");
 
@@ -46,6 +41,12 @@ function SkillsMaster() {
     } catch (err) {
 
       console.log(err);
+      console.log(err.response);
+      alert(
+        err.response?.data?.message ||
+        err.message ||
+        "Error Adding Skill"
+      );
 
     }
 
@@ -72,7 +73,7 @@ function SkillsMaster() {
       {skills.map((skill) => (
 
         <p key={skill.id}>
-          {skill.id} - {skill.name}
+          {skill.id} - {skill.skill_name || skill.name}
         </p>
 
       ))}

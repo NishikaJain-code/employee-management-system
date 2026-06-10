@@ -7,7 +7,14 @@ function Navbar() {
   const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  let userObj = {};
+  try {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser && storedUser !== "undefined") {
+      userObj = JSON.parse(storedUser);
+    }
+  } catch(e) {}
+  const user = userObj;
   const token = localStorage.getItem("token");
 
   useEffect(() => {

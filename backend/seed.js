@@ -58,6 +58,8 @@ async function seed() {
         address TEXT,
         designation VARCHAR(100),
         salary NUMERIC(10,2),
+        joining_date DATE,
+        profile_pic TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -155,16 +157,16 @@ async function seed() {
     // ─── EMPLOYEE PROFILES ───────────────────────────────────────────────────
     console.log("📋  Seeding employee profiles...");
     const profileData = [
-      { idx: 0, dept: 1, phone: "9876543210", address: "Indore", designation: "Director",          salary: 150000 },
-      { idx: 1, dept: 1, phone: "9876543211", address: "Indore", designation: "Project Manager",   salary: 85000  },
-      { idx: 2, dept: 3, phone: "9876543212", address: "Indore", designation: "HR Manager",        salary: 70000  },
-      { idx: 3, dept: 1, phone: "9876543213", address: "Indore", designation: "React Developer",   salary: 45000  },
-      { idx: 4, dept: 1, phone: "9876543214", address: "Indore", designation: "Node Developer",    salary: 50000  },
-      { idx: 5, dept: 2, phone: "9876543215", address: "Indore", designation: "QA Engineer",       salary: 40000  },
-      { idx: 6, dept: 5, phone: "9876543216", address: "Indore", designation: "Marketing Executive",salary: 35000 },
-      { idx: 7, dept: 6, phone: "9876543217", address: "Indore", designation: "Sales Executive",   salary: 38000  },
-      { idx: 8, dept: 8, phone: "9876543218", address: "Indore", designation: "Support Engineer",  salary: 32000  },
-      { idx: 9, dept: 4, phone: "9876543219", address: "Indore", designation: "Accountant",        salary: 42000  }
+      { idx: 0, dept: 1, phone: "9876543210", address: "Indore", designation: "Director",          salary: 150000, joining_date: "2023-01-15" },
+      { idx: 1, dept: 1, phone: "9876543211", address: "Indore", designation: "Project Manager",   salary: 85000, joining_date: "2023-03-10" },
+      { idx: 2, dept: 3, phone: "9876543212", address: "Indore", designation: "HR Manager",        salary: 70000, joining_date: "2024-05-22" },
+      { idx: 3, dept: 1, phone: "9876543213", address: "Indore", designation: "React Developer",   salary: 45000, joining_date: "2024-08-11" },
+      { idx: 4, dept: 1, phone: "9876543214", address: "Indore", designation: "Node Developer",    salary: 50000, joining_date: "2025-02-01" },
+      { idx: 5, dept: 2, phone: "9876543215", address: "Indore", designation: "QA Engineer",       salary: 40000, joining_date: "2025-06-18" },
+      { idx: 6, dept: 5, phone: "9876543216", address: "Indore", designation: "Marketing Executive",salary: 35000, joining_date: "2025-09-09" },
+      { idx: 7, dept: 6, phone: "9876543217", address: "Indore", designation: "Sales Executive",   salary: 38000, joining_date: "2025-11-20" },
+      { idx: 8, dept: 8, phone: "9876543218", address: "Indore", designation: "Support Engineer",  salary: 32000, joining_date: "2026-02-14" },
+      { idx: 9, dept: 4, phone: "9876543219", address: "Indore", designation: "Accountant",        salary: 42000, joining_date: "2026-04-25" }
     ];
 
     // Get actual dept IDs from inserted rows
@@ -174,8 +176,8 @@ async function seed() {
     const profileIds = [];
     for (const p of profileData) {
       const res = await client.query(
-        "INSERT INTO employee_profiles (user_id, department_id, phone, address, designation, salary) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id",
-        [userIds[p.idx], deptIds[p.dept - 1], p.phone, p.address, p.designation, p.salary]
+        "INSERT INTO employee_profiles (user_id, department_id, phone, address, designation, salary, joining_date) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id",
+        [userIds[p.idx], deptIds[p.dept - 1], p.phone, p.address, p.designation, p.salary, p.joining_date]
       );
       profileIds.push(res.rows[0].id);
     }

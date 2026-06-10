@@ -53,6 +53,7 @@ router.get("/", verifyToken, async (req, res) => {
         ep.address,
         ep.designation,
         ep.salary,
+        ep.joining_date,
         ep.profile_pic,
         ep.created_at,
         u.id AS user_id,
@@ -111,6 +112,7 @@ router.get("/:id", verifyToken, async (req, res) => {
         ep.address,
         ep.designation,
         ep.salary,
+        ep.joining_date,
         ep.profile_pic,
         ep.created_at,
         u.id AS user_id,
@@ -163,7 +165,7 @@ router.put("/:id", verifyToken, async (req, res) => {
   const client = await pool.connect();
   try {
     const profileId = req.params.id;
-    const { phone, address, designation, salary, department_id, skills } = req.body;
+    const { phone, address, designation, salary, department_id, skills, joining_date } = req.body;
 
     // Check authorization: User can only update their own profile, unless they are Admin/HR
     const checkQuery = "SELECT user_id FROM employee_profiles WHERE id = $1";
@@ -183,8 +185,8 @@ router.put("/:id", verifyToken, async (req, res) => {
     // Update main profile fields
     const updateProfileQuery = `
       UPDATE employee_profiles 
-      SET phone = $1, address = $2, designation = $3, salary = $4, department_id = $5
-      WHERE id = $6
+      SET phone = $1, address = $2, designation = $3, salary = $4, department_id = $5, joining_date = $6
+      WHERE id = $7
       RETURNING *
     `;
     const profileUpdateResult = await client.query(updateProfileQuery, [
@@ -193,6 +195,7 @@ router.put("/:id", verifyToken, async (req, res) => {
       designation,
       salary || 0.00,
       department_id || null,
+      joining_date || null,
       profileId
     ]);
 

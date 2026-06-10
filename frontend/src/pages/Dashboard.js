@@ -14,7 +14,7 @@ function Dashboard() {
     try {
       setLoading(true);
       const res = await api.get("/api/reports/summary");
-      setStats(res.data);
+      setStats(res.data.data || res.data);
     } catch (err) {
       setError("Failed to load dashboard. Please ensure you are logged in.");
       console.error(err);

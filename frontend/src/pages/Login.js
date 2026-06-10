@@ -33,8 +33,11 @@ function Login() {
         formData
       );
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const token = res.data.data?.token || res.data.token;
+      const user = res.data.data?.user || res.data.user;
+      
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
       navigate("/dashboard");
     } catch (err) {
