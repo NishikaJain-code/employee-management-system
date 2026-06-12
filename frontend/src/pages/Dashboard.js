@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../utils/api";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area
+  PieChart, Pie, Cell, AreaChart, Area
 } from "recharts";
 
 const COLORS = ['var(--accent-cyan)', 'var(--accent-blue)', 'var(--accent-pink)', 'var(--accent-purple)', 'var(--accent-yellow)', 'var(--accent-red)'];
