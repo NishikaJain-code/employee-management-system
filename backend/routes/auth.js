@@ -67,7 +67,7 @@ router.post("/login", async (req, res) => {
       "SELECT * FROM users WHERE email = $1",
       [email]
     );
-
+console.log("User Found:", userResult.rows);
     if (userResult.rows.length === 0) {
       return res.status(400).json({
         message: "Invalid email or password."
@@ -80,7 +80,9 @@ router.post("/login", async (req, res) => {
       password,
       user.password
     );
-
+console.log("Entered Password:", password);
+console.log("Stored Hash:", user.password);
+console.log("Match Result:", isMatch);
     if (!isMatch) {
       return res.status(400).json({
         message: "Invalid email or password."
