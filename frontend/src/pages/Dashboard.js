@@ -15,10 +15,29 @@ function Dashboard() {
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchDashboardData = async () => {
+  try {
+    setLoading(true);
+    const resStats = await api.get("/api/reports/summary");
+    setStats(resStats.data.data || resStats.data);
+
+    if (user.role !== "employee") {
+      const resEmp = await api.get("/api/employees");
+      setEmployees(resEmp.data || []);
+    }
+  } catch (err) {
+    setError("Failed to load dashboard. Please ensure you are logged in.");
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 useEffect(() => {
   fetchDashboardData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
+
 
   const fetchDashboardData = async () => {
     try {
