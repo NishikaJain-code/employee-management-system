@@ -119,6 +119,44 @@ console.log("Match Result:", isMatch);
     });
   }
 });
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    console.log("Email entered:", email);
+    console.log("Password entered:", password);
+
+    const userResult = await pool.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+
+    console.log("User found:", userResult.rows);
+
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({
+        message: "Invalid email or password."
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    console.log("Stored Hash:", user.password);
+
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
+
+    console.log("Password Match:", isMatch);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Invalid email or password."
+      });
+    }
+
+    // existing code...
 
 // CURRENT USER
 router.get("/user", verifyToken, async (req, res) => {
