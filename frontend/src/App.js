@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
 
 // Existing pages
 import Login           from "./pages/Login";
@@ -20,43 +20,55 @@ import AssetManagement from "./pages/AssetManagement";
 import Notifications   from "./pages/Notifications";
 import AuditTrail      from "./pages/AuditTrail";
 import Reports         from "./pages/Reports";
-import Navbar          from "./components/Navbar";
+import Layout          from "./components/Layout";
+
+// Protected Route Wrapper
+function ProtectedLayout() {
+  const token = localStorage.getItem("token");
+  if (!token) return <Navigate to="/" replace />;
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
+}
 
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
       <Routes>
-
         {/* ── Authentication ── */}
         <Route path="/"       element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* ── Core ── */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile"   element={<Profile />} />
-        <Route path="/upload"    element={<UploadFiles />} />
+        {/* ── Authenticated App Layout ── */}
+        <Route element={<ProtectedLayout />}>
+          {/* ── Core ── */}
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile"   element={<Profile />} />
+          <Route path="/upload"    element={<UploadFiles />} />
 
-        {/* ── Employee Management ── */}
-        <Route path="/employees"        element={<EmployeeList />} />
-        <Route path="/create-employee"  element={<CreateEmployee />} />
-        <Route path="/edit-employee"    element={<EditEmployee />} />
+          {/* ── Employee Management ── */}
+          <Route path="/employees"        element={<EmployeeList />} />
+          <Route path="/create-employee"  element={<CreateEmployee />} />
+          <Route path="/edit-employee/:id" element={<EditEmployee />} />
+          <Route path="/edit-employee"    element={<EditEmployee />} />
 
-        {/* ── Masters ── */}
-        <Route path="/departments" element={<DepartmentMaster />} />
-        <Route path="/skills"      element={<SkillsMaster />} />
+          {/* ── Masters ── */}
+          <Route path="/departments" element={<DepartmentMaster />} />
+          <Route path="/skills"      element={<SkillsMaster />} />
 
-        {/* ── Leave Management ── */}
-        <Route path="/apply-leave"    element={<LeaveApplication />} />
-        <Route path="/leave-approval" element={<LeaveApproval />} />
-        <Route path="/hr-approval"    element={<HRApproval />} />
+          {/* ── Leave Management ── */}
+          <Route path="/apply-leave"    element={<LeaveApplication />} />
+          <Route path="/leave-approval" element={<LeaveApproval />} />
+          <Route path="/hr-approval"    element={<HRApproval />} />
 
-        {/* ── Phase 5: Enterprise Features ── */}
-        <Route path="/assets"        element={<AssetManagement />} />
-        <Route path="/notifications" element={<Notifications />} />
-        <Route path="/audit"         element={<AuditTrail />} />
-        <Route path="/reports"       element={<Reports />} />
-
+          {/* ── Phase 5: Enterprise Features ── */}
+          <Route path="/assets"        element={<AssetManagement />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/audit"         element={<AuditTrail />} />
+          <Route path="/reports"       element={<Reports />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

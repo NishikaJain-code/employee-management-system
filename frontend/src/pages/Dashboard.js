@@ -1,20 +1,36 @@
 import { useEffect, useState } from "react";
 import api from "../utils/api";
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  PieChart, Pie, Cell, LineChart, Line
+} from "recharts";
+
+  const COLORS = ['#00FFC2', '#00B8FF', '#FF00E5', '#7B61FF', '#FFB800', '#FF3D71'];
+
+  // Data mapping...
 
 function Dashboard() {
   const [stats, setStats] = useState(null);
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
   useEffect(() => {
-    fetchDashboard();
+    fetchDashboardData();
   }, []);
 
-  const fetchDashboard = async () => {
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/api/reports/summary");
-      setStats(res.data.data || res.data);
+      const resStats = await api.get("/api/reports/summary");
+      setStats(resStats.data.data || resStats.data);
+
+      if (user.role !== "employee") {
+        const resEmp = await api.get("/api/employees");
+        setEmployees(resEmp.data || []);
+      }
     } catch (err) {
       setError("Failed to load dashboard. Please ensure you are logged in.");
       console.error(err);
@@ -23,240 +39,229 @@ function Dashboard() {
     }
   };
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  // Computations for graphs
+  // 1. Department Distribution
+  const deptCount = {};
+  // 2. Location Breakdown
+  const locationCount = {};
+  // 3. Average & Total Salary by Dept
+  const deptSalary = {};
+  // 4. Hiring Growth Trend (Cumulative)
+  const hiringDataMap = {};
 
-  const cardStyle = (bg) => ({
-    background: bg,
-    borderRadius: "16px",
-    padding: "24px 28px",
-    color: "#fff",
-    minWidth: "160px",
-    flex: "1",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-    transition: "transform 0.2s",
-    cursor: "default",
+  employees.forEach(emp => {
+    // Dept count
+    const dName = emp.department_name || "Unassigned";
+    deptCount[dName] = (deptCount[dName] || 0) + 1;
+
+    // Location
+    const loc = emp.address || "Unknown";
+    locationCount[loc] = (locationCount[loc] || 0) + 1;
+
+    // Salary
+    const sal = parseFloat(emp.salary) || 0;
+    if (!deptSalary[dName]) deptSalary[dName] = { total: 0, count: 0 };
+    deptSalary[dName].total += sal;
+    deptSalary[dName].count += 1;
+
+    // Hiring trend
+    if (emp.joining_date) {
+      const monthYear = new Date(emp.joining_date).toISOString().substring(0, 7); // YYYY-MM
+      hiringDataMap[monthYear] = (hiringDataMap[monthYear] || 0) + 1;
+    }
   });
 
-  const maxBarVal =
-    stats && stats.departmentWiseCount.length > 0
-      ? Math.max(...stats.departmentWiseCount.map((d) => parseInt(d.total) || 0)) || 1
-      : 1;
+  const deptDistributionData = Object.keys(deptCount).map(k => ({ name: k, value: deptCount[k] }));
+  const locationData = Object.keys(locationCount).map(k => ({ name: k, count: locationCount[k] }));
+  const salaryData = Object.keys(deptSalary).map(k => ({
+    name: k,
+    avgSalary: Math.round(deptSalary[k].total / deptSalary[k].count),
+    totalPayroll: deptSalary[k].total
+  }));
 
-  if (loading) return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "60vh" }}>
-      <div style={{ fontSize: "18px", color: "#6c63ff" }}>⏳ Loading dashboard...</div>
-    </div>
-  );
+  // Sort and accumulate hiring data
+  const sortedMonths = Object.keys(hiringDataMap).sort();
+  let cumulative = 0;
+  const hiringTrendData = sortedMonths.map(m => {
+    cumulative += hiringDataMap[m];
+    return { month: m, employees: cumulative };
+  });
 
-  if (error) return (
-    <div style={{ padding: "40px", color: "#e53e3e", fontSize: "16px" }}>
-      ⚠️ {error}
-    </div>
-  );
+  // Leave Mix
+  const leaveMixData = stats?.leaveTypeUsage?.map(lt => ({
+    name: lt.leave_name,
+    value: parseInt(lt.total_days) || 0
+  })) || [];
+
+  const statCardStyle = {
+    background: "#080B13",
+    borderRadius: "20px",
+    padding: "24px",
+    flex: "1",
+    minWidth: "200px",
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+    border: "1px solid rgba(255, 255, 255, 0.05)",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+  };
+
+  const graphCardStyle = {
+    background: "#080B13",
+    borderRadius: "20px",
+    padding: "24px",
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+    border: "1px solid rgba(255, 255, 255, 0.05)",
+    marginBottom: "24px",
+    transition: "all 0.3s ease"
+  };
+
+  if (loading) return <div style={{ padding: "40px", color: "#4a5568" }}>Loading dashboard analytics...</div>;
+  if (error) return <div style={{ padding: "40px", color: "#e53e3e" }}>{error}</div>;
 
   return (
-    <div style={{ padding: "32px", fontFamily: "'Segoe UI', sans-serif", background: "#f0f4ff", minHeight: "100vh" }}>
+    <div style={{ paddingBottom: "40px" }}>
+      <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#f8fafc", marginBottom: "32px", letterSpacing: "-0.5px" }}>
+        System Overview
+      </h1>
 
-      {/* Header */}
-      <div style={{
-        background: "linear-gradient(135deg, #6c63ff 0%, #4facfe 100%)",
-        borderRadius: "20px",
-        padding: "32px 36px",
-        marginBottom: "32px",
-        color: "#fff",
-        boxShadow: "0 8px 32px rgba(108,99,255,0.3)"
-      }}>
-        <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 700 }}>📊 Enterprise Dashboard</h1>
-        <p style={{ margin: "8px 0 0", opacity: 0.85 }}>Welcome back, <strong>{user.name || "User"}</strong> — {user.role}</p>
+      {/* Top Stat Cards */}
+      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "32px" }}>
+        <div style={statCardStyle} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.borderColor = "#00FFC2"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)"; }}>
+          <div style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Total Employees</div>
+          <div style={{ fontSize: "36px", fontWeight: "800", color: "#f8fafc", marginTop: "8px" }}>
+            {stats?.summary?.totalEmployees || 0}
+          </div>
+          <div style={{ fontSize: "13px", color: "#00FFC2", marginTop: "8px", fontWeight: "600" }}>Active workforce</div>
+        </div>
+        
+        <div style={statCardStyle} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.borderColor = "#FFB800"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)"; }}>
+          <div style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Pending Leaves</div>
+          <div style={{ fontSize: "36px", fontWeight: "800", color: "#f8fafc", marginTop: "8px" }}>
+            {stats?.summary?.pendingLeaves || 0}
+          </div>
+          <div style={{ fontSize: "13px", color: "#FFB800", marginTop: "8px", fontWeight: "600" }}>Needs action</div>
+        </div>
+
+        <div style={statCardStyle} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.borderColor = "#00B8FF"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)"; }}>
+          <div style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Allocated Assets</div>
+          <div style={{ fontSize: "36px", fontWeight: "800", color: "#f8fafc", marginTop: "8px" }}>
+            {stats?.summary?.assignedAssets || 0}
+          </div>
+          <div style={{ fontSize: "13px", color: "#00B8FF", marginTop: "8px", fontWeight: "600" }}>Total tracked items</div>
+        </div>
+
+        <div style={statCardStyle} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.borderColor = "#FF00E5"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)"; }}>
+          <div style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Monthly Salary</div>
+          <div style={{ fontSize: "36px", fontWeight: "800", color: "#f8fafc", marginTop: "8px", background: "linear-gradient(135deg, #FF00E5 0%, #7B61FF 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            ₹{Number(stats?.summary?.totalSalaryExpense || 0).toLocaleString("en-IN")}
+          </div>
+          <div style={{ fontSize: "13px", color: "#FF00E5", marginTop: "8px", fontWeight: "600" }}>Current baseline</div>
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      {stats && (
+      {user.role !== "employee" && (
         <>
-          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", marginBottom: "32px" }}>
-            {user.role !== "employee" && (
-              <div style={cardStyle("linear-gradient(135deg,#667eea,#764ba2)")}>
-                <div style={{ fontSize: "13px", opacity: 0.85, marginBottom: "8px" }}>👥 Total Employees</div>
-                <div style={{ fontSize: "36px", fontWeight: 800 }}>{stats.summary.totalEmployees}</div>
+          {/* Row 1: Dept Strength & Leave Mix */}
+          <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
+            <div style={{ ...graphCardStyle, flex: 2, minWidth: "400px" }}>
+              <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Department Strength</h3>
+              <div style={{ height: "300px" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={deptDistributionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="name" tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
+                    <YAxis tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
+                    <Tooltip cursor={{fill: "rgba(255,255,255,0.02)"}} contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
+                    <Bar dataKey="value" fill="#00FFC2" radius={[4, 4, 0, 0]} barSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            )}
-            {user.role !== "employee" && (
-              <div style={cardStyle("linear-gradient(135deg,#f093fb,#f5576c)")}>
-                <div style={{ fontSize: "13px", opacity: 0.85, marginBottom: "8px" }}>🏢 Departments</div>
-                <div style={{ fontSize: "36px", fontWeight: 800 }}>{stats.summary.totalDepartments}</div>
+            </div>
+
+            <div style={{ ...graphCardStyle, flex: 1, minWidth: "300px" }}>
+              <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Leave Mix</h3>
+              <div style={{ height: "300px" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={leaveMixData} innerRadius={70} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
+                      {leaveMixData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
+                    <Legend iconType="circle" wrapperStyle={{fontSize: "12px", color: "#cbd5e1"}} />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
-            )}
-            <div style={cardStyle("linear-gradient(135deg,#4facfe,#00f2fe)")}>
-              <div style={{ fontSize: "13px", opacity: 0.85, marginBottom: "8px" }}>⏳ Pending Leaves</div>
-              <div style={{ fontSize: "36px", fontWeight: 800 }}>{stats.summary.pendingLeaves}</div>
             </div>
-            <div style={cardStyle("linear-gradient(135deg,#43e97b,#38f9d7)")}>
-              <div style={{ fontSize: "13px", opacity: 0.85, marginBottom: "8px" }}>✅ Approved Leaves</div>
-              <div style={{ fontSize: "36px", fontWeight: 800 }}>{stats.summary.approvedLeaves}</div>
-            </div>
-            <div style={cardStyle("linear-gradient(135deg,#fa709a,#fee140)")}>
-              <div style={{ fontSize: "13px", opacity: 0.85, marginBottom: "8px" }}>💻 Assets Assigned</div>
-              <div style={{ fontSize: "36px", fontWeight: 800 }}>{stats.summary.assignedAssets}</div>
-            </div>
-            {user.role !== "employee" && (
-              <div style={cardStyle("linear-gradient(135deg,#30cfd0,#667eea)")}>
-                <div style={{ fontSize: "13px", opacity: 0.85, marginBottom: "8px" }}>💰 Total Salary</div>
-                <div style={{ fontSize: "28px", fontWeight: 800 }}>
-                  ₹{Number(stats.summary.totalSalaryExpense).toLocaleString("en-IN")}
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Charts Row (Admin/HR/Manager only) */}
-          {user.role !== "employee" && (
-            <div style={{ display: "flex", gap: "24px", flexWrap: "wrap", marginBottom: "32px" }}>
+          {/* Row 2: Hiring Trend */}
+          <div style={graphCardStyle}>
+            <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Hiring Growth Trend</h3>
+            <div style={{ height: "300px" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={hiringTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="month" tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
+                  <YAxis tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
+                  <Tooltip contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
+                  <Line type="monotone" dataKey="employees" stroke="#00B8FF" strokeWidth={3} dot={{r: 4, fill: "#00B8FF", strokeWidth: 2, stroke: "#080B13"}} activeDot={{r: 6, fill: "#fff"}} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-              {/* Department Bar Chart */}
-              <div style={{
-                background: "#fff",
-                borderRadius: "16px",
-                padding: "28px",
-                flex: "1",
-                minWidth: "300px",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
-              }}>
-                <h3 style={{ margin: "0 0 20px", color: "#2d3748", fontSize: "16px" }}>
-                  🏢 Department-wise Employees
-                </h3>
-                {stats.departmentWiseCount.map((dept, i) => {
-                  const barColors = ["#6c63ff","#f5576c","#4facfe","#43e97b","#fa709a","#30cfd0"];
-                  const pct = Math.round(((parseInt(dept.total) || 0) / maxBarVal) * 100);
-                  return (
-                    <div key={i} style={{ marginBottom: "14px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "13px", color: "#555" }}>
-                        <span>{dept.department_name}</span>
-                        <strong>{dept.total}</strong>
-                      </div>
-                      <div style={{ background: "#eef2ff", borderRadius: "8px", height: "10px" }}>
-                        <div style={{
-                          width: `${pct}%`,
-                          background: barColors[i % barColors.length],
-                          borderRadius: "8px",
-                          height: "100%",
-                          transition: "width 0.8s ease"
-                        }} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Leave Type Usage */}
-              <div style={{
-                background: "#fff",
-                borderRadius: "16px",
-                padding: "28px",
-                flex: "1",
-                minWidth: "280px",
-                boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
-              }}>
-                <h3 style={{ margin: "0 0 20px", color: "#2d3748", fontSize: "16px" }}>
-                  📋 Leave Type Usage (Approved Days)
-                </h3>
-                {stats.leaveTypeUsage.map((lt, i) => {
-                  const colors = ["#6c63ff","#f5576c","#43e97b","#4facfe","#fa709a"];
-                  return (
-                    <div key={i} style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "12px 14px",
-                      marginBottom: "8px",
-                      background: "#f7f9ff",
-                      borderRadius: "10px",
-                      borderLeft: `4px solid ${colors[i % colors.length]}`
-                    }}>
-                      <span style={{ fontSize: "14px", color: "#444" }}>{lt.leave_name}</span>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{ fontWeight: 700, color: colors[i % colors.length] }}>{lt.total_days} days</div>
-                        <div style={{ fontSize: "11px", color: "#999" }}>{lt.applications} applications</div>
-                      </div>
-                    </div>
-                  );
-                })}
+          {/* Row 3: Salary & Payroll Analysis */}
+          <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
+            <div style={{ ...graphCardStyle, flex: 1, minWidth: "400px" }}>
+              <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Average Salary By Department (₹)</h3>
+              <div style={{ height: "300px" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={salaryData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="name" tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
+                    <YAxis tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
+                    <Tooltip cursor={{fill: "rgba(255,255,255,0.02)"}} contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
+                    <Bar dataKey="avgSalary" fill="#FF00E5" radius={[4, 4, 0, 0]} barSize={30} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
-          )}
 
-          {/* Top Absent Employees (Admin/HR/Manager only) */}
-          {user.role !== "employee" && (
-            <div style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "28px",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.08)"
-            }}>
-              <h3 style={{ margin: "0 0 20px", color: "#2d3748", fontSize: "16px" }}>🏆 Top 5 Absent Employees</h3>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
-                <thead>
-                  <tr style={{ background: "#f0f4ff" }}>
-                    <th style={{ padding: "12px 16px", textAlign: "left", color: "#555", fontWeight: 600 }}>Rank</th>
-                    <th style={{ padding: "12px 16px", textAlign: "left", color: "#555", fontWeight: 600 }}>Name</th>
-                    <th style={{ padding: "12px 16px", textAlign: "left", color: "#555", fontWeight: 600 }}>Designation</th>
-                    <th style={{ padding: "12px 16px", textAlign: "left", color: "#555", fontWeight: 600 }}>Total Days Absent</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.topAbsentEmployees.map((emp, i) => (
-                    <tr key={i} style={{ borderBottom: "1px solid #eee" }}>
-                      <td style={{ padding: "12px 16px", color: i === 0 ? "#f5576c" : "#888" }}>
-                        {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
-                      </td>
-                      <td style={{ padding: "12px 16px", fontWeight: 600, color: "#2d3748" }}>{emp.name}</td>
-                      <td style={{ padding: "12px 16px", color: "#666" }}>{emp.designation}</td>
-                      <td style={{ padding: "12px 16px" }}>
-                        <span style={{
-                          background: "#fff0f3",
-                          color: "#f5576c",
-                          fontWeight: 700,
-                          padding: "4px 12px",
-                          borderRadius: "20px",
-                          fontSize: "13px"
-                        }}>
-                          {emp.total_absent_days} days
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                  {stats.topAbsentEmployees.length === 0 && (
-                    <tr>
-                      <td colSpan={4} style={{ textAlign: "center", padding: "20px", color: "#aaa" }}>
-                        No leave data yet.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+            <div style={{ ...graphCardStyle, flex: 1, minWidth: "400px" }}>
+              <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Payroll Cost Analysis By Department (₹)</h3>
+              <div style={{ height: "300px" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={salaryData} margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="name" tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
+                    <YAxis tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
+                    <Tooltip cursor={{fill: "rgba(255,255,255,0.02)"}} contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
+                    <Bar dataKey="totalPayroll" fill="#7B61FF" radius={[4, 4, 0, 0]} barSize={30} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          )}
+          </div>
 
-          {/* Employee Welcome Area */}
-          {user.role === "employee" && (
-            <div style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "40px",
-              textAlign: "center",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-              color: "#2d3748"
-            }}>
-              <span style={{ fontSize: "48px" }}>👋</span>
-              <h2 style={{ margin: "16px 0 8px", fontSize: "20px", fontWeight: 700 }}>Welcome to your Employee Dashboard</h2>
-              <p style={{ margin: 0, fontSize: "14px", color: "#718096", lineHeight: "1.6" }}>
-                Use the navigation menu above to request time off via <strong>Apply Leave</strong>,<br />
-                check your active company hardware and gear under <strong>Assets</strong>,<br />
-                or upload verification files/documents in the <strong>Documents</strong> area.
-              </p>
+          {/* Row 4: Location Breakdown */}
+          <div style={graphCardStyle}>
+            <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Location Breakdown (Top Cities)</h3>
+            <div style={{ height: "300px" }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={locationData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                  <XAxis dataKey="name" tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
+                  <YAxis tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
+                  <Tooltip cursor={{fill: "rgba(255,255,255,0.02)"}} contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
+                  <Bar dataKey="count" fill="#FFB800" radius={[4, 4, 0, 0]} barSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-          )}
+          </div>
         </>
       )}
+
     </div>
   );
 }

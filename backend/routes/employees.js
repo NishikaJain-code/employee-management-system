@@ -3,41 +3,27 @@ const router = express.Router();
 const pool = require("../config/db");
 const { verifyToken, authorize } = require("../middleware/auth");
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("cloudinary").v2;
 
-// Ensure uploads directory exists
-const UPLOADS_DIR = path.join(__dirname, "../uploads");
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-}
+// Cloudinary Configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
-// Multer Storage Configuration
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, UPLOADS_DIR);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+// Cloudinary Storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "hrms_uploads",
+    allowed_formats: ["jpg", "png", "jpeg", "gif"],
   }
 });
 
-// File filter (accept images only)
-const fileFilter = (req, file, cb) => {
-  const allowedTypes = /jpeg|jpg|png|gif/;
-  const ext = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mime = allowedTypes.test(file.mimetype);
-  if (ext && mime) {
-    cb(null, true);
-  } else {
-    cb(new Error("Only images (.jpg, .jpeg, .png, .gif) are allowed!"));
-  }
-};
-
 const upload = multer({
   storage: storage,
-  fileFilter: fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
 });
 
@@ -257,10 +243,10 @@ router.post("/:id/upload", verifyToken, (req, res, next) => {
 
     const uploadedImages = [];
     for (let file of req.files) {
-      const relativePath = `/uploads/${file.filename}`;
+      const cloudUrl = file.path; // Cloudinary returns the full absolute URL here
       const result = await pool.query(
         "INSERT INTO employee_images (employee_id, image_url) VALUES ($1, $2) RETURNING id, image_url",
-        [profileId, relativePath]
+        [profileId, cloudUrl]
       );
       uploadedImages.push(result.rows[0]);
     }
@@ -322,7 +308,7 @@ router.post("/:id/profile-pic", verifyToken, upload.single("profile_pic"), async
       return res.status(400).json({ message: "No file uploaded." });
     }
 
-    const imageUrl = `/uploads/${req.file.filename}`;
+    const imageUrl = req.file.path; // Cloudinary full URL
 
     // Update profile_pic column
     await pool.query(

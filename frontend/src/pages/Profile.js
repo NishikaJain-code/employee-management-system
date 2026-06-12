@@ -193,7 +193,7 @@ function Profile() {
             }}>
               {profile.profile_pic ? (
                 <img
-                  src={`http://localhost:5000${profile.profile_pic}`}
+                  src={profile.profile_pic.startsWith("http") ? profile.profile_pic : `http://localhost:5000${profile.profile_pic}`}
                   alt="Profile"
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
@@ -426,7 +426,7 @@ function Profile() {
                 profile.images.map((img) => (
                   <a
                     key={img.id}
-                    href={`http://localhost:5000${img.image_url}`}
+                    href={img.image_url.startsWith("http") ? img.image_url : `http://localhost:5000${img.image_url}`}
                     target="_blank"
                     rel="noreferrer"
                     style={{
