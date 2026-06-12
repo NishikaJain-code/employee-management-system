@@ -6,11 +6,11 @@ const BASEURL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const inputStyle = {
   width: "100%", padding: "14px 18px",
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "var(--bg-input)",
+  border: "1px solid var(--border-medium)",
   borderRadius: "14px", fontSize: "14px",
   boxSizing: "border-box", outline: "none",
-  color: "#f1f5f9", fontFamily: "'Outfit', sans-serif",
+  color: "var(--text-primary)", fontFamily: "'Outfit', sans-serif",
   transition: "border-color 0.2s, box-shadow 0.2s",
 };
 
@@ -38,49 +38,49 @@ function Signup() {
     }
   };
 
-  const inputFocus = (e) => { e.target.style.borderColor = "#00FFC2"; e.target.style.boxShadow = "0 0 0 4px rgba(0,255,194,0.08)"; };
-  const inputBlur = (e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "none"; };
+  const inputFocus = (e) => { e.target.style.borderColor = "var(--accent-cyan)"; e.target.style.boxShadow = "0 0 0 4px rgba(0,255,194,0.08)"; };
+  const inputBlur = (e) => { e.target.style.borderColor = "var(--border-medium)"; e.target.style.boxShadow = "none"; };
 
   return (
     <div style={{
       display: "flex", justifyContent: "center", alignItems: "center",
-      minHeight: "100vh", background: "#05070a",
+      minHeight: "100vh", background: "var(--bg-main)",
       fontFamily: "'Outfit', sans-serif", position: "relative", overflow: "hidden"
     }}>
       <div style={{ position: "absolute", top: "-100px", right: "-80px", width: "450px", height: "450px", background: "radial-gradient(circle, rgba(123,97,255,0.1) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: "-80px", left: "-80px", width: "380px", height: "380px", background: "radial-gradient(circle, rgba(0,255,194,0.07) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
 
       <div style={{
-        background: "rgba(18, 25, 38, 0.7)",
+        background: "var(--bg-card)",
         backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)",
         borderRadius: "32px", padding: "48px 44px",
         width: "100%", maxWidth: "420px",
         boxShadow: "0 30px 60px rgba(0,0,0,0.5)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: "1px solid var(--border-medium)",
         textAlign: "center", position: "relative", zIndex: 1
       }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
           <div style={{
             width: "52px", height: "52px",
-            background: "linear-gradient(135deg, #7B61FF 0%, #00B8FF 100%)",
+            background: "linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%)",
             borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center",
             color: "#fff", fontWeight: "900", fontSize: "18px",
             boxShadow: "0 0 24px rgba(123,97,255,0.35)"
           }}>IS</div>
         </div>
 
-        <h1 style={{ margin: "0 0 8px", fontSize: "30px", fontWeight: 800, color: "#f1f5f9", letterSpacing: "-0.5px" }}>Create Account</h1>
-        <p style={{ color: "#64748b", fontSize: "14px", margin: "0 0 32px", fontWeight: 500 }}>
+        <h1 style={{ margin: "0 0 8px", fontSize: "30px", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>Create Account</h1>
+        <p style={{ color: "var(--text-muted)", fontSize: "14px", margin: "0 0 32px", fontWeight: 500 }}>
           Join the enterprise portal in seconds
         </p>
 
         {errorMsg && (
-          <div style={{ background: "rgba(255,61,113,0.1)", color: "#FF3D71", border: "1px solid rgba(255,61,113,0.2)", borderRadius: "12px", padding: "12px 16px", fontSize: "13px", fontWeight: 600, marginBottom: "24px", textAlign: "left" }}>
+          <div style={{ background: "rgba(255,61,113,0.1)", color: "var(--accent-red)", border: "1px solid rgba(255,61,113,0.2)", borderRadius: "12px", padding: "12px 16px", fontSize: "13px", fontWeight: 600, marginBottom: "24px", textAlign: "left" }}>
             ⚠️ {errorMsg}
           </div>
         )}
         {successMsg && (
-          <div style={{ background: "rgba(0,255,194,0.08)", color: "#00FFC2", border: "1px solid rgba(0,255,194,0.2)", borderRadius: "12px", padding: "12px 16px", fontSize: "13px", fontWeight: 600, marginBottom: "24px", textAlign: "left" }}>
+          <div style={{ background: "rgba(0,255,194,0.08)", color: "var(--accent-cyan)", border: "1px solid rgba(0,255,194,0.2)", borderRadius: "12px", padding: "12px 16px", fontSize: "13px", fontWeight: 600, marginBottom: "24px", textAlign: "left" }}>
             ✅ {successMsg}
           </div>
         )}
@@ -92,7 +92,7 @@ function Signup() {
             { label: "Password", name: "password", type: "password", placeholder: "••••••••" },
           ].map((field) => (
             <div key={field.name} style={{ marginBottom: "20px" }}>
-              <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: 700, color: "#94a3b8" }}>{field.label}</label>
+              <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)" }}>{field.label}</label>
               <input type={field.type} name={field.name} placeholder={field.placeholder}
                 value={formData[field.name]} onChange={handleChange} style={inputStyle}
                 onFocus={inputFocus} onBlur={inputBlur}
@@ -101,22 +101,22 @@ function Signup() {
           ))}
 
           <div style={{ marginBottom: "32px" }}>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: 700, color: "#94a3b8" }}>Role</label>
+            <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)" }}>Role</label>
             <select name="role" value={formData.role} onChange={handleChange} style={{
               ...inputStyle, cursor: "pointer",
               appearance: "none", WebkitAppearance: "none"
             }} onFocus={inputFocus} onBlur={inputBlur}>
-              <option value="employee" style={{ background: "#121926" }}>Employee</option>
-              <option value="manager" style={{ background: "#121926" }}>Manager</option>
-              <option value="hr" style={{ background: "#121926" }}>HR</option>
-              <option value="admin" style={{ background: "#121926" }}>Admin</option>
+              <option value="employee" style={{ background: "var(--bg-card)" }}>Employee</option>
+              <option value="manager" style={{ background: "var(--bg-card)" }}>Manager</option>
+              <option value="hr" style={{ background: "var(--bg-card)" }}>HR</option>
+              <option value="admin" style={{ background: "var(--bg-card)" }}>Admin</option>
             </select>
           </div>
 
           <button type="submit" disabled={loading} style={{
             width: "100%",
-            background: loading ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #7B61FF 0%, #00B8FF 100%)",
-            color: loading ? "#64748b" : "#fff",
+            background: loading ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%)",
+            color: loading ? "var(--text-muted)" : "#fff",
             border: "none", borderRadius: "50px", padding: "16px",
             fontSize: "15px", fontWeight: 800, cursor: loading ? "not-allowed" : "pointer",
             boxShadow: loading ? "none" : "0 4px 20px rgba(123,97,255,0.3)",
@@ -130,11 +130,11 @@ function Signup() {
         </form>
 
         <div style={{ marginTop: "32px", height: "1px", background: "rgba(255,255,255,0.06)" }} />
-        <p style={{ marginTop: "24px", fontSize: "14px", color: "#64748b" }}>
+        <p style={{ marginTop: "24px", fontSize: "14px", color: "var(--text-muted)" }}>
           Already have an account?{" "}
-          <Link to="/" style={{ color: "#00FFC2", fontWeight: 700, textDecoration: "none" }}
-            onMouseEnter={(e) => e.currentTarget.style.color = "#00B8FF"}
-            onMouseLeave={(e) => e.currentTarget.style.color = "#00FFC2"}
+          <Link to="/" style={{ color: "var(--accent-cyan)", fontWeight: 700, textDecoration: "none" }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "var(--accent-blue)"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "var(--accent-cyan)"}
           >Sign in</Link>
         </p>
       </div>

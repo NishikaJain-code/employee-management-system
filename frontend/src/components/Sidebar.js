@@ -49,9 +49,9 @@ function Sidebar({ user }) {
   return (
     <aside style={{
       width: "260px",
-      background: "#080B13",
-      borderRight: "1px solid rgba(255, 255, 255, 0.05)",
-      color: "#94a3b8",
+      background: "var(--bg-main)",
+      borderRight: "1px solid var(--border-light)",
+      color: "var(--text-secondary)",
       display: "flex",
       flexDirection: "column",
       height: "100vh",
@@ -63,21 +63,21 @@ function Sidebar({ user }) {
       overflowY: "auto"
     }}>
       {/* Logo */}
-      <div style={{ padding: "28px 20px 24px", display: "flex", alignItems: "center", gap: "14px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
+      <div style={{ padding: "28px 20px 24px", display: "flex", alignItems: "center", gap: "14px", borderBottom: "1px solid var(--border-light)", flexShrink: 0 }}>
         <div style={{ 
           width: "38px", height: "38px", 
-          background: "linear-gradient(135deg, #00FFC2 0%, #00B8FF 100%)", 
+          background: "linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-blue) 100%)", 
           borderRadius: "12px", 
           display: "flex", alignItems: "center", justifyContent: "center", 
-          color: "#080B13", fontWeight: "900", fontSize: "14px",
+          color: "var(--bg-main)", fontWeight: "900", fontSize: "14px",
           boxShadow: "0 0 20px rgba(0, 255, 194, 0.25)",
           flexShrink: 0
         }}>
           IS
         </div>
         <div>
-          <div style={{ color: "#f1f5f9", fontWeight: "800", fontSize: "17px", letterSpacing: "0.3px", lineHeight: 1.1 }}>i-SOFTZONE</div>
-          <div style={{ fontSize: "11px", color: "#00FFC2", fontWeight: "600", letterSpacing: "1.5px", textTransform: "uppercase", marginTop: "3px" }}>Enterprise HRMS</div>
+          <div style={{ color: "var(--text-primary)", fontWeight: "800", fontSize: "17px", letterSpacing: "0.3px", lineHeight: 1.1 }}>i-SOFTZONE</div>
+          <div style={{ fontSize: "11px", color: "var(--accent-cyan)", fontWeight: "600", letterSpacing: "1.5px", textTransform: "uppercase", marginTop: "3px" }}>Enterprise HRMS</div>
         </div>
       </div>
 
@@ -98,9 +98,9 @@ function Sidebar({ user }) {
                 borderRadius: "50px",   // PILL SHAPE — not rectangle
                 fontSize: "14px",
                 fontWeight: isActive ? "700" : "500",
-                color: isActive ? "#080B13" : "#64748b",
+                color: isActive ? "var(--bg-main)" : "var(--text-muted)",
                 background: isActive 
-                  ? "linear-gradient(135deg, #00FFC2 0%, #00B8FF 100%)"
+                  ? "linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-blue) 100%)"
                   : "transparent",
                 boxShadow: isActive ? "0 4px 16px rgba(0, 255, 194, 0.25)" : "none",
                 transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -108,19 +108,19 @@ function Sidebar({ user }) {
               onMouseEnter={(e) => { 
                 if (!isActive) { 
                   e.currentTarget.style.color = "#e2e8f0"; 
-                  e.currentTarget.style.background = "rgba(255,255,255,0.04)"; 
+                  e.currentTarget.style.background = "var(--bg-input)"; 
                 } 
               }}
               onMouseLeave={(e) => { 
                 if (!isActive) { 
-                  e.currentTarget.style.color = "#64748b"; 
+                  e.currentTarget.style.color = "var(--text-muted)"; 
                   e.currentTarget.style.background = "transparent"; 
                 } 
               }}
             >
               <span style={{ 
                 flexShrink: 0,
-                color: isActive ? "#080B13" : "#64748b",
+                color: isActive ? "var(--bg-main)" : "var(--text-muted)",
               }}>
                 {item.icon}
               </span>
@@ -131,7 +131,7 @@ function Sidebar({ user }) {
       </div>
       
       {/* Footer Badge */}
-      <div style={{ padding: "16px 12px 24px", borderTop: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
+      <div style={{ padding: "16px 12px 24px", borderTop: "1px solid var(--border-light)", flexShrink: 0 }}>
         <div style={{ 
           display: "flex", alignItems: "center", gap: "10px", padding: "14px 16px", 
           background: "rgba(0, 255, 194, 0.04)", 
@@ -140,7 +140,7 @@ function Sidebar({ user }) {
         }}>
           <div style={{
             width: "32px", height: "32px",
-            background: "linear-gradient(135deg, #7B61FF 0%, #00B8FF 100%)",
+            background: "linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%)",
             borderRadius: "50%",
             display: "flex", alignItems: "center", justifyContent: "center",
             color: "#fff", fontWeight: "800", fontSize: "13px",
@@ -150,10 +150,10 @@ function Sidebar({ user }) {
             {user?.name?.substring(0, 2).toUpperCase() || "U"}
           </div>
           <div style={{ overflow: "hidden" }}>
-            <div style={{ fontSize: "13px", fontWeight: "700", color: "#f1f5f9", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {user?.name || "User"}
             </div>
-            <div style={{ fontSize: "11px", color: "#00FFC2", fontWeight: "600", textTransform: "capitalize" }}>
+            <div style={{ fontSize: "11px", color: "var(--accent-cyan)", fontWeight: "600", textTransform: "capitalize" }}>
               {user?.role}
             </div>
           </div>

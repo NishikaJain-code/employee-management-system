@@ -15,7 +15,7 @@ function Layout({ children }) {
     <div style={{ 
       display: "flex", 
       minHeight: "100vh", 
-      background: "#05070a",
+      background: "var(--bg-main)",
       color: "#e2e8f0",
       fontFamily: "'Outfit', sans-serif" 
     }}>

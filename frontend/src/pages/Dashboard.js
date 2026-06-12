@@ -5,7 +5,7 @@ import {
   PieChart, Pie, Cell, LineChart, Line, AreaChart, Area
 } from "recharts";
 
-const COLORS = ['#00FFC2', '#00B8FF', '#FF00E5', '#7B61FF', '#FFB800', '#FF3D71'];
+const COLORS = ['var(--accent-cyan)', 'var(--accent-blue)', 'var(--accent-pink)', 'var(--accent-purple)', 'var(--accent-yellow)', 'var(--accent-red)'];
 
 function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -86,20 +86,20 @@ function Dashboard() {
 
   // === Styles ===
   const bentoCard = {
-    background: "rgba(18, 25, 38, 0.5)",
+    background: "var(--bg-card)",
     backdropFilter: "blur(40px)",
     WebkitBackdropFilter: "blur(40px)",
     borderRadius: "28px",
     padding: "28px",
     boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
-    border: "1px solid rgba(255, 255, 255, 0.05)",
+    border: "1px solid var(--border-light)",
     transition: "border-color 0.3s ease",
     position: "relative",
     overflow: "hidden"
   };
 
   const tooltipStyle = {
-    background: "#080B13", 
+    background: "var(--bg-main)", 
     borderRadius: "16px", 
     border: "1px solid rgba(255,255,255,0.1)", 
     color: "#fff", 
@@ -108,16 +108,16 @@ function Dashboard() {
     fontSize: "13px"
   };
 
-  const axisStyle = { fontSize: 12, fill: "#94a3b8" };
+  const axisStyle = { fontSize: 12, fill: "var(--text-secondary)" };
 
   if (loading) return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "60vh", flexDirection: "column", gap: "16px" }}>
-      <div style={{ width: "48px", height: "48px", border: "3px solid rgba(0,255,194,0.2)", borderTopColor: "#00FFC2", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
-      <div style={{ color: "#64748b", fontSize: "15px" }}>Initializing Dashboard...</div>
+      <div style={{ width: "48px", height: "48px", border: "3px solid rgba(0,255,194,0.2)", borderTopColor: "var(--accent-cyan)", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+      <div style={{ color: "var(--text-muted)", fontSize: "15px" }}>Initializing Dashboard...</div>
     </div>
   );
 
-  if (error) return <div style={{ padding: "40px", color: "#FF3D71", fontSize: "15px" }}>⚠️ {error}</div>;
+  if (error) return <div style={{ padding: "40px", color: "var(--accent-red)", fontSize: "15px" }}>⚠️ {error}</div>;
 
   return (
     <div style={{ paddingBottom: "60px" }}>
@@ -134,20 +134,20 @@ function Dashboard() {
             borderRadius: "50%", pointerEvents: "none"
           }} />
           <div style={{ position: "relative", zIndex: 1 }}>
-            <div style={{ fontSize: "13px", color: "#00FFC2", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "12px" }}>
+            <div style={{ fontSize: "13px", color: "var(--accent-cyan)", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "12px" }}>
               Enterprise HRMS
             </div>
             <h1 style={{ fontSize: "38px", fontWeight: "800", color: "#fff", margin: "0 0 12px 0", letterSpacing: "-1px", lineHeight: 1.1 }}>
-              Hello, <span style={{ background: "linear-gradient(135deg, #00FFC2, #00B8FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{user?.name?.split(" ")[0] || "Admin"}</span> 👋
+              Hello, <span style={{ background: "linear-gradient(135deg, var(--accent-cyan), var(--accent-blue))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{user?.name?.split(" ")[0] || "Admin"}</span> 👋
             </h1>
-            <p style={{ fontSize: "15px", color: "#64748b", margin: "0 0 32px 0", lineHeight: "1.7", maxWidth: "480px" }}>
+            <p style={{ fontSize: "15px", color: "var(--text-muted)", margin: "0 0 32px 0", lineHeight: "1.7", maxWidth: "480px" }}>
               Your workforce is active and healthy. You have{" "}
-              <span style={{ color: "#FFB800", fontWeight: "700" }}>{stats?.summary?.pendingLeaves || 0} pending approvals</span>{" "}
+              <span style={{ color: "var(--accent-yellow)", fontWeight: "700" }}>{stats?.summary?.pendingLeaves || 0} pending approvals</span>{" "}
               that need your attention today.
             </p>
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
               <button style={{
-                background: "linear-gradient(135deg, #00FFC2, #00B8FF)", color: "#080B13",
+                background: "linear-gradient(135deg, var(--accent-cyan), var(--accent-blue))", color: "var(--bg-main)",
                 border: "none", padding: "13px 28px", borderRadius: "50px", fontSize: "14px",
                 fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 20px rgba(0, 255, 194, 0.3)",
                 transition: "transform 0.2s, box-shadow 0.2s", letterSpacing: "0.3px"
@@ -157,13 +157,13 @@ function Dashboard() {
                 Review Approvals →
               </button>
               <button style={{
-                background: "rgba(255,255,255,0.05)", color: "#94a3b8",
+                background: "var(--border-light)", color: "var(--text-secondary)",
                 border: "1px solid rgba(255,255,255,0.1)", padding: "13px 28px",
                 borderRadius: "50px", fontSize: "14px", fontWeight: "700", cursor: "pointer",
                 transition: "all 0.2s"
               }}
               onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#fff"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#94a3b8"; }}>
+              onMouseLeave={e => { e.currentTarget.style.background = "var(--border-light)"; e.currentTarget.style.color = "var(--text-secondary)"; }}>
                 View Reports
               </button>
             </div>
@@ -174,10 +174,10 @@ function Dashboard() {
         <div style={{ gridColumn: "span 4", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
           
           {[
-            { label: "Total Staff", value: stats?.summary?.totalEmployees || 0, color: "#00FFC2", sub: "Active employees" },
-            { label: "Pending Leaves", value: stats?.summary?.pendingLeaves || 0, color: "#FFB800", sub: "Awaiting action" },
-            { label: "Assets Tracked", value: stats?.summary?.assignedAssets || 0, color: "#00B8FF", sub: "Allocated items" },
-            { label: "Departments", value: deptDistributionData.length, color: "#7B61FF", sub: "Active units" },
+            { label: "Total Staff", value: stats?.summary?.totalEmployees || 0, color: "var(--accent-cyan)", sub: "Active employees" },
+            { label: "Pending Leaves", value: stats?.summary?.pendingLeaves || 0, color: "var(--accent-yellow)", sub: "Awaiting action" },
+            { label: "Assets Tracked", value: stats?.summary?.assignedAssets || 0, color: "var(--accent-blue)", sub: "Allocated items" },
+            { label: "Departments", value: deptDistributionData.length, color: "var(--accent-purple)", sub: "Active units" },
           ].map((stat, i) => (
             <div key={i} style={{
               ...bentoCard,
@@ -186,9 +186,9 @@ function Dashboard() {
               borderRadius: "24px"
             }}
             onMouseEnter={e => e.currentTarget.style.borderColor = stat.color + "40"}
-            onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)"}
+            onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border-light)"}
             >
-              <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.8px" }}>
+              <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.8px" }}>
                 {stat.label}
               </div>
               <div style={{ fontSize: "34px", fontWeight: "800", color: "#fff", lineHeight: 1 }}>
@@ -210,15 +210,15 @@ function Dashboard() {
           borderRadius: "inherit", pointerEvents: "none"
         }} />
         <div style={{ position: "relative", zIndex: 1 }}>
-          <div style={{ fontSize: "12px", color: "#FF00E5", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "8px" }}>Monthly Payroll</div>
-          <div style={{ fontSize: "48px", fontWeight: "900", background: "linear-gradient(135deg, #FF00E5 0%, #7B61FF 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-2px", lineHeight: 1 }}>
+          <div style={{ fontSize: "12px", color: "var(--accent-pink)", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "8px" }}>Monthly Payroll</div>
+          <div style={{ fontSize: "48px", fontWeight: "900", background: "linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-purple) 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-2px", lineHeight: 1 }}>
             ₹{Number(stats?.summary?.totalSalaryExpense || 0).toLocaleString("en-IN")}
           </div>
-          <div style={{ fontSize: "14px", color: "#64748b", marginTop: "8px" }}>Total salary expenditure across all departments</div>
+          <div style={{ fontSize: "14px", color: "var(--text-muted)", marginTop: "8px" }}>Total salary expenditure across all departments</div>
         </div>
         <div style={{ position: "relative", zIndex: 1, background: "rgba(255,0,229,0.08)", border: "1px solid rgba(255,0,229,0.15)", borderRadius: "20px", padding: "16px 24px", textAlign: "center" }}>
           <div style={{ fontSize: "28px", fontWeight: "800", color: "#fff" }}>{employees.length}</div>
-          <div style={{ fontSize: "12px", color: "#FF00E5", fontWeight: "600", marginTop: "4px" }}>ON PAYROLL</div>
+          <div style={{ fontSize: "12px", color: "var(--accent-pink)", fontWeight: "600", marginTop: "4px" }}>ON PAYROLL</div>
         </div>
       </div>
 
@@ -228,28 +228,28 @@ function Dashboard() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: "20px", marginBottom: "20px" }}>
 
             <div style={{ ...bentoCard, gridColumn: "span 8" }}>
-              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Workforce Growth Trend</h3>
+              <h3 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: "700", margin: "0 0 24px 0" }}>Workforce Growth Trend</h3>
               <div style={{ height: "300px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={hiringTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#00B8FF" stopOpacity={0.35}/>
-                        <stop offset="95%" stopColor="#00B8FF" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="var(--accent-blue)" stopOpacity={0.35}/>
+                        <stop offset="95%" stopColor="var(--accent-blue)" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--bg-input)" />
                     <XAxis dataKey="month" tick={axisStyle} axisLine={false} tickLine={false} />
                     <YAxis tick={axisStyle} axisLine={false} tickLine={false} />
                     <Tooltip contentStyle={tooltipStyle} />
-                    <Area type="monotone" dataKey="employees" stroke="#00B8FF" strokeWidth={3} fillOpacity={1} fill="url(#areaGrad)" />
+                    <Area type="monotone" dataKey="employees" stroke="var(--accent-blue)" strokeWidth={3} fillOpacity={1} fill="url(#areaGrad)" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             <div style={{ ...bentoCard, gridColumn: "span 4" }}>
-              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Department Mix</h3>
+              <h3 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: "700", margin: "0 0 24px 0" }}>Department Mix</h3>
               <div style={{ height: "300px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -259,7 +259,7 @@ function Dashboard() {
                       ))}
                     </Pie>
                     <Tooltip contentStyle={tooltipStyle} />
-                    <Legend iconType="circle" wrapperStyle={{fontSize: "12px", color: "#94a3b8"}} />
+                    <Legend iconType="circle" wrapperStyle={{fontSize: "12px", color: "var(--text-secondary)"}} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -271,7 +271,7 @@ function Dashboard() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
             
             <div style={bentoCard}>
-              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Leave Type Usage</h3>
+              <h3 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: "700", margin: "0 0 24px 0" }}>Leave Type Usage</h3>
               <div style={{ height: "280px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -281,22 +281,22 @@ function Dashboard() {
                       ))}
                     </Pie>
                     <Tooltip contentStyle={tooltipStyle} />
-                    <Legend iconType="circle" wrapperStyle={{fontSize: "12px", color: "#94a3b8"}} />
+                    <Legend iconType="circle" wrapperStyle={{fontSize: "12px", color: "var(--text-secondary)"}} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             <div style={bentoCard}>
-              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Avg Salary by Department (₹)</h3>
+              <h3 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: "700", margin: "0 0 24px 0" }}>Avg Salary by Department (₹)</h3>
               <div style={{ height: "280px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={salaryData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.04)" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="var(--bg-input)" />
                     <XAxis type="number" tick={axisStyle} axisLine={false} tickLine={false} />
                     <YAxis dataKey="name" type="category" tick={axisStyle} axisLine={false} tickLine={false} width={80} />
-                    <Tooltip cursor={{fill: "rgba(255,255,255,0.02)"}} contentStyle={tooltipStyle} />
-                    <Bar dataKey="avgSalary" fill="#7B61FF" radius={[0, 20, 20, 0]} barSize={20} />
+                    <Tooltip cursor={{fill: "var(--bg-hover)"}} contentStyle={tooltipStyle} />
+                    <Bar dataKey="avgSalary" fill="var(--accent-purple)" radius={[0, 20, 20, 0]} barSize={20} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -308,30 +308,30 @@ function Dashboard() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
 
             <div style={bentoCard}>
-              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Payroll Cost by Department (₹)</h3>
+              <h3 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: "700", margin: "0 0 24px 0" }}>Payroll Cost by Department (₹)</h3>
               <div style={{ height: "280px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={salaryData} margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--bg-input)" />
                     <XAxis dataKey="name" tick={axisStyle} axisLine={false} tickLine={false} />
                     <YAxis tick={axisStyle} axisLine={false} tickLine={false} />
-                    <Tooltip cursor={{fill:"rgba(255,255,255,0.02)"}} contentStyle={tooltipStyle} />
-                    <Bar dataKey="totalPayroll" fill="#FF00E5" radius={[16, 16, 0, 0]} barSize={28} />
+                    <Tooltip cursor={{fill:"var(--bg-hover)"}} contentStyle={tooltipStyle} />
+                    <Bar dataKey="totalPayroll" fill="var(--accent-pink)" radius={[16, 16, 0, 0]} barSize={28} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             <div style={bentoCard}>
-              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Geographic Distribution</h3>
+              <h3 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: "700", margin: "0 0 24px 0" }}>Geographic Distribution</h3>
               <div style={{ height: "280px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={locationData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--bg-input)" />
                     <XAxis dataKey="name" tick={axisStyle} axisLine={false} tickLine={false} />
                     <YAxis tick={axisStyle} axisLine={false} tickLine={false} />
-                    <Tooltip cursor={{fill:"rgba(255,255,255,0.02)"}} contentStyle={tooltipStyle} />
-                    <Bar dataKey="count" fill="#FFB800" radius={[16, 16, 0, 0]} barSize={28} />
+                    <Tooltip cursor={{fill:"var(--bg-hover)"}} contentStyle={tooltipStyle} />
+                    <Bar dataKey="count" fill="var(--accent-yellow)" radius={[16, 16, 0, 0]} barSize={28} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

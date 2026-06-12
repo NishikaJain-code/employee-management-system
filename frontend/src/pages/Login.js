@@ -6,11 +6,11 @@ const BASEURL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const inputStyle = {
   width: "100%", padding: "14px 18px",
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.08)",
+  background: "var(--bg-input)",
+  border: "1px solid var(--border-medium)",
   borderRadius: "14px", fontSize: "14px",
   boxSizing: "border-box", outline: "none",
-  color: "#f1f5f9", fontFamily: "'Outfit', sans-serif",
+  color: "var(--text-primary)", fontFamily: "'Outfit', sans-serif",
   transition: "border-color 0.2s, box-shadow 0.2s",
 };
 
@@ -43,7 +43,7 @@ function Login() {
   return (
     <div style={{
       display: "flex", justifyContent: "center", alignItems: "center",
-      minHeight: "100vh", background: "#05070a",
+      minHeight: "100vh", background: "var(--bg-main)",
       fontFamily: "'Outfit', sans-serif", position: "relative", overflow: "hidden"
     }}>
       {/* Background glow orbs */}
@@ -51,33 +51,33 @@ function Login() {
       <div style={{ position: "absolute", bottom: "-100px", right: "-100px", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(0,184,255,0.08) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
 
       <div style={{
-        background: "rgba(18, 25, 38, 0.7)",
+        background: "var(--bg-card)",
         backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)",
         borderRadius: "32px", padding: "48px 44px",
         width: "100%", maxWidth: "420px",
         boxShadow: "0 30px 60px rgba(0,0,0,0.5)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: "1px solid var(--border-medium)",
         textAlign: "center", position: "relative", zIndex: 1
       }}>
         {/* Logo */}
         <div style={{ display: "flex", justifyContent: "center", marginBottom: "24px" }}>
           <div style={{
             width: "52px", height: "52px",
-            background: "linear-gradient(135deg, #00FFC2 0%, #00B8FF 100%)",
+            background: "linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-blue) 100%)",
             borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#080B13", fontWeight: "900", fontSize: "18px",
+            color: "var(--bg-main)", fontWeight: "900", fontSize: "18px",
             boxShadow: "0 0 24px rgba(0,255,194,0.35)"
           }}>IS</div>
         </div>
 
-        <h1 style={{ margin: "0 0 8px", fontSize: "30px", fontWeight: 800, color: "#f1f5f9", letterSpacing: "-0.5px" }}>Welcome Back</h1>
-        <p style={{ color: "#64748b", fontSize: "14px", margin: "0 0 32px", fontWeight: 500 }}>
+        <h1 style={{ margin: "0 0 8px", fontSize: "30px", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.5px" }}>Welcome Back</h1>
+        <p style={{ color: "var(--text-muted)", fontSize: "14px", margin: "0 0 32px", fontWeight: 500 }}>
           Log in to your HRMS workspace
         </p>
 
         {errorMsg && (
           <div style={{
-            background: "rgba(255,61,113,0.1)", color: "#FF3D71",
+            background: "rgba(255,61,113,0.1)", color: "var(--accent-red)",
             border: "1px solid rgba(255,61,113,0.2)", borderRadius: "12px",
             padding: "12px 16px", fontSize: "13px", fontWeight: 600,
             marginBottom: "24px", textAlign: "left"
@@ -86,25 +86,25 @@ function Login() {
 
         <form onSubmit={handleSubmit} style={{ textAlign: "left" }}>
           <div style={{ marginBottom: "20px" }}>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: 700, color: "#94a3b8" }}>Email Address</label>
+            <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)" }}>Email Address</label>
             <input type="email" name="email" placeholder="name@company.com"
               value={formData.email} onChange={handleChange} style={inputStyle}
-              onFocus={(e) => { e.target.style.borderColor = "#00FFC2"; e.target.style.boxShadow = "0 0 0 4px rgba(0,255,194,0.08)"; }}
-              onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "none"; }}
+              onFocus={(e) => { e.target.style.borderColor = "var(--accent-cyan)"; e.target.style.boxShadow = "0 0 0 4px rgba(0,255,194,0.08)"; }}
+              onBlur={(e) => { e.target.style.borderColor = "var(--border-medium)"; e.target.style.boxShadow = "none"; }}
             />
           </div>
           <div style={{ marginBottom: "32px" }}>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: 700, color: "#94a3b8" }}>Password</label>
+            <label style={{ display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: 700, color: "var(--text-secondary)" }}>Password</label>
             <input type="password" name="password" placeholder="••••••••"
               value={formData.password} onChange={handleChange} style={inputStyle}
-              onFocus={(e) => { e.target.style.borderColor = "#00FFC2"; e.target.style.boxShadow = "0 0 0 4px rgba(0,255,194,0.08)"; }}
-              onBlur={(e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "none"; }}
+              onFocus={(e) => { e.target.style.borderColor = "var(--accent-cyan)"; e.target.style.boxShadow = "0 0 0 4px rgba(0,255,194,0.08)"; }}
+              onBlur={(e) => { e.target.style.borderColor = "var(--border-medium)"; e.target.style.boxShadow = "none"; }}
             />
           </div>
           <button type="submit" disabled={loading} style={{
             width: "100%",
-            background: loading ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #00FFC2 0%, #00B8FF 100%)",
-            color: loading ? "#64748b" : "#080B13",
+            background: loading ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-blue) 100%)",
+            color: loading ? "var(--text-muted)" : "var(--bg-main)",
             border: "none", borderRadius: "50px", padding: "16px",
             fontSize: "15px", fontWeight: 800, cursor: loading ? "not-allowed" : "pointer",
             boxShadow: loading ? "none" : "0 4px 20px rgba(0,255,194,0.3)",
@@ -119,11 +119,11 @@ function Login() {
         </form>
 
         <div style={{ marginTop: "32px", height: "1px", background: "rgba(255,255,255,0.06)" }} />
-        <p style={{ marginTop: "24px", fontSize: "14px", color: "#64748b" }}>
+        <p style={{ marginTop: "24px", fontSize: "14px", color: "var(--text-muted)" }}>
           Don't have an account?{" "}
-          <Link to="/signup" style={{ color: "#00FFC2", fontWeight: 700, textDecoration: "none" }}
-            onMouseEnter={(e) => e.currentTarget.style.color = "#00B8FF"}
-            onMouseLeave={(e) => e.currentTarget.style.color = "#00FFC2"}
+          <Link to="/signup" style={{ color: "var(--accent-cyan)", fontWeight: 700, textDecoration: "none" }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "var(--accent-blue)"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "var(--accent-cyan)"}
           >Create account</Link>
         </p>
       </div>

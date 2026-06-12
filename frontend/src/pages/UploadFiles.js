@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../utils/api";
 
-const card = { background: "rgba(18,25,38,0.5)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" };
+const card = { background: "var(--bg-card)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderRadius: "24px", border: "1px solid var(--border-light)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" };
 
 function UploadFiles() {
   const [files, setFiles] = useState([]);
@@ -39,47 +39,47 @@ function UploadFiles() {
     <div style={{ fontFamily: "'Outfit', sans-serif", paddingBottom: "40px" }}>
       <div style={{ ...card, padding: "28px 32px", marginBottom: "24px", background: "linear-gradient(135deg, rgba(123,97,255,0.12) 0%, rgba(0,184,255,0.08) 100%)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: "#f1f5f9" }}>Verification Documents</h2>
-          <p style={{ margin: "6px 0 0", color: "#64748b", fontSize: "14px" }}>Upload identification cards and certificates</p>
+          <h2 style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: "var(--text-primary)" }}>Verification Documents</h2>
+          <p style={{ margin: "6px 0 0", color: "var(--text-muted)", fontSize: "14px" }}>Upload identification cards and certificates</p>
         </div>
         <div style={{ fontSize: "40px" }}>📁</div>
       </div>
 
       <div style={{ ...card, padding: "40px", maxWidth: "600px", margin: "0 auto", textAlign: "center" }}>
         <div style={{ fontSize: "56px", marginBottom: "20px" }}>☁️</div>
-        <h2 style={{ margin: "0 0 8px 0", fontSize: "20px", color: "#f1f5f9", fontWeight: 800 }}>Upload Files</h2>
-        <p style={{ color: "#64748b", fontSize: "14px", margin: "0 0 32px 0" }}>Images only (.jpg, .jpeg, .png, .gif) — Max 5MB</p>
+        <h2 style={{ margin: "0 0 8px 0", fontSize: "20px", color: "var(--text-primary)", fontWeight: 800 }}>Upload Files</h2>
+        <p style={{ color: "var(--text-muted)", fontSize: "14px", margin: "0 0 32px 0" }}>Images only (.jpg, .jpeg, .png, .gif) — Max 5MB</p>
 
-        {error && <div style={{ background: "rgba(255,61,113,0.1)", color: "#FF3D71", border: "1px solid rgba(255,61,113,0.2)", borderRadius: "12px", padding: "14px", fontSize: "14px", fontWeight: 600, marginBottom: "24px", textAlign: "left" }}>⚠️ {error}</div>}
-        {message && <div style={{ background: "rgba(0,255,194,0.1)", color: "#00FFC2", border: "1px solid rgba(0,255,194,0.2)", borderRadius: "12px", padding: "14px", fontSize: "14px", fontWeight: 600, marginBottom: "24px", textAlign: "left" }}>✅ {message}</div>}
+        {error && <div style={{ background: "rgba(255,61,113,0.1)", color: "var(--accent-red)", border: "1px solid rgba(255,61,113,0.2)", borderRadius: "12px", padding: "14px", fontSize: "14px", fontWeight: 600, marginBottom: "24px", textAlign: "left" }}>⚠️ {error}</div>}
+        {message && <div style={{ background: "rgba(0,255,194,0.1)", color: "var(--accent-cyan)", border: "1px solid rgba(0,255,194,0.2)", borderRadius: "12px", padding: "14px", fontSize: "14px", fontWeight: 600, marginBottom: "24px", textAlign: "left" }}>✅ {message}</div>}
 
         <form onSubmit={uploadFiles}>
           <div style={{
-            border: "2px dashed rgba(255,255,255,0.1)", borderRadius: "16px", padding: "32px", background: "rgba(255,255,255,0.02)",
+            border: "2px dashed rgba(255,255,255,0.1)", borderRadius: "16px", padding: "32px", background: "var(--bg-hover)",
             cursor: "pointer", marginBottom: "28px", position: "relative", transition: "border-color 0.2s, background 0.2s"
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#7B61FF"; e.currentTarget.style.background = "rgba(123,97,255,0.05)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.background = "rgba(255,255,255,0.02)"; }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--accent-purple)"; e.currentTarget.style.background = "rgba(123,97,255,0.05)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.background = "var(--bg-hover)"; }}
           >
             <input type="file" multiple onChange={handleChange} style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", opacity: 0, cursor: "pointer" }} />
-            <p style={{ margin: 0, fontWeight: 700, color: "#94a3b8", fontSize: "15px" }}>Click to browse files or drag them here</p>
-            {files.length > 0 && <div style={{ marginTop: "16px", color: "#00B8FF", fontWeight: 800, fontSize: "14px" }}>📎 {files.length} file(s) selected</div>}
+            <p style={{ margin: 0, fontWeight: 700, color: "var(--text-secondary)", fontSize: "15px" }}>Click to browse files or drag them here</p>
+            {files.length > 0 && <div style={{ marginTop: "16px", color: "var(--accent-blue)", fontWeight: 800, fontSize: "14px" }}>📎 {files.length} file(s) selected</div>}
           </div>
 
           {files.length > 0 && (
-            <div style={{ textAlign: "left", background: "rgba(255,255,255,0.02)", borderRadius: "12px", padding: "16px 20px", marginBottom: "28px", border: "1px solid rgba(255,255,255,0.05)" }}>
-              <h4 style={{ margin: "0 0 10px 0", fontSize: "13px", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px" }}>Files to Upload:</h4>
-              <ul style={{ margin: 0, paddingLeft: "20px", fontSize: "14px", color: "#f1f5f9" }}>
+            <div style={{ textAlign: "left", background: "var(--bg-hover)", borderRadius: "12px", padding: "16px 20px", marginBottom: "28px", border: "1px solid var(--border-light)" }}>
+              <h4 style={{ margin: "0 0 10px 0", fontSize: "13px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>Files to Upload:</h4>
+              <ul style={{ margin: 0, paddingLeft: "20px", fontSize: "14px", color: "var(--text-primary)" }}>
                 {Array.from(files).map((file, idx) => (
-                  <li key={idx} style={{ marginBottom: "6px", fontWeight: 600 }}>{file.name} <span style={{ color: "#64748b", fontSize: "12px", fontWeight: 400 }}>({Math.round(file.size / 1024)} KB)</span></li>
+                  <li key={idx} style={{ marginBottom: "6px", fontWeight: 600 }}>{file.name} <span style={{ color: "var(--text-muted)", fontSize: "12px", fontWeight: 400 }}>({Math.round(file.size / 1024)} KB)</span></li>
                 ))}
               </ul>
             </div>
           )}
 
           <button type="submit" disabled={loading} style={{
-            width: "100%", background: loading ? "rgba(255,255,255,0.05)" : "linear-gradient(135deg, #7B61FF 0%, #00B8FF 100%)",
-            color: loading ? "#64748b" : "#fff", border: "none", borderRadius: "50px", padding: "16px", fontSize: "15px", fontWeight: 800,
+            width: "100%", background: loading ? "var(--border-light)" : "linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%)",
+            color: loading ? "var(--text-muted)" : "#fff", border: "none", borderRadius: "50px", padding: "16px", fontSize: "15px", fontWeight: 800,
             cursor: loading ? "not-allowed" : "pointer", boxShadow: loading ? "none" : "0 4px 15px rgba(123,97,255,0.3)", transition: "transform 0.2s"
           }}
           onMouseEnter={(e) => { if (!loading) e.currentTarget.style.transform = "scale(1.02)"; }}

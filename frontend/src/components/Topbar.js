@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Search, Bell, LogOut } from "lucide-react";
+import React, { useEffect, useState, useContext } from "react";
+import { Search, Bell, LogOut, Sun, Moon } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../utils/api";
+import { ThemeContext } from "../App";
 
 function Topbar({ user }) {
+  const { theme, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -32,7 +34,7 @@ function Topbar({ user }) {
       background: "rgba(5, 7, 10, 0.8)",
       backdropFilter: "blur(24px)",
       WebkitBackdropFilter: "blur(24px)",
-      borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+      borderBottom: "1px solid var(--border-light)",
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
@@ -52,8 +54,8 @@ function Topbar({ user }) {
           style={{
             width: "100%",
             padding: "11px 18px 11px 46px",
-            background: "rgba(255, 255, 255, 0.04)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "var(--bg-input)",
+            border: "1px solid var(--border-medium)",
             borderRadius: "50px",
             outline: "none",
             fontSize: "14px",
@@ -63,13 +65,13 @@ function Topbar({ user }) {
             fontFamily: "'Outfit', sans-serif"
           }}
           onFocus={(e) => { 
-            e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)"; 
-            e.currentTarget.style.borderColor = "#00FFC2"; 
+            e.currentTarget.style.background = "var(--border-medium)"; 
+            e.currentTarget.style.borderColor = "var(--accent-cyan)"; 
             e.currentTarget.style.boxShadow = "0 0 0 4px rgba(0, 255, 194, 0.08)"; 
           }}
           onBlur={(e) => { 
-            e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)"; 
-            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.08)"; 
+            e.currentTarget.style.background = "var(--bg-input)"; 
+            e.currentTarget.style.borderColor = "var(--border-medium)"; 
             e.currentTarget.style.boxShadow = "none"; 
           }}
         />
@@ -83,20 +85,20 @@ function Topbar({ user }) {
           style={{ 
             position: "relative", cursor: "pointer", 
             width: "42px", height: "42px",
-            background: "rgba(255, 255, 255, 0.04)",
+            background: "var(--bg-input)",
             border: "1px solid rgba(255, 255, 255, 0.07)",
             borderRadius: "50%",
             display: "flex", alignItems: "center", justifyContent: "center",
             transition: "all 0.2s"
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
-          onMouseLeave={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.04)"}
+          onMouseEnter={(e) => e.currentTarget.style.background = "var(--border-medium)"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "var(--bg-input)"}
         >
-          <Bell size={18} color="#64748b" />
+          <Bell size={18} color="var(--text-muted)" />
           {unreadCount > 0 && (
             <span style={{
               position: "absolute", top: "1px", right: "1px",
-              background: "#FF00E5",
+              background: "var(--accent-pink)",
               color: "#fff", width: "16px", height: "16px", borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "9px", fontWeight: "800",
@@ -107,22 +109,42 @@ function Topbar({ user }) {
           )}
         </div>
 
+        {/* Theme Toggle */}
+        <button 
+          onClick={toggleTheme}
+          style={{
+            background: "var(--bg-input)",
+            border: "1px solid rgba(255, 255, 255, 0.07)",
+            borderRadius: "50%",
+            width: "42px", height: "42px",
+            cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "var(--text-primary)",
+            transition: "all 0.2s"
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = "var(--border-medium)"}
+          onMouseLeave={(e) => e.currentTarget.style.background = "var(--bg-input)"}
+          title="Toggle Theme"
+        >
+          {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+        </button>
+
         {/* Divider */}
-        <div style={{ width: "1px", height: "32px", background: "rgba(255,255,255,0.08)" }} />
+        <div style={{ width: "1px", height: "32px", background: "var(--border-medium)" }} />
 
         {/* User Info + Avatar */}
         <Link to="/profile" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: "14px", fontWeight: "700", color: "#f1f5f9", lineHeight: 1.2 }}>
+            <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-primary)", lineHeight: 1.2 }}>
               {user?.name || "User"}
             </div>
-            <div style={{ fontSize: "12px", color: "#00FFC2", textTransform: "capitalize", fontWeight: "600" }}>
+            <div style={{ fontSize: "12px", color: "var(--accent-cyan)", textTransform: "capitalize", fontWeight: "600" }}>
               {user?.role}
             </div>
           </div>
           <div style={{ 
             width: "42px", height: "42px", 
-            background: "linear-gradient(135deg, #7B61FF 0%, #00B8FF 100%)", 
+            background: "linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%)", 
             borderRadius: "50%", 
             display: "flex", alignItems: "center", justifyContent: "center", 
             color: "#fff", fontWeight: "800", fontSize: "15px",
@@ -143,17 +165,17 @@ function Topbar({ user }) {
             width: "42px", height: "42px",
             cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#FF3D71",
+            color: "var(--accent-red)",
             transition: "all 0.25s ease"
           }}
           onMouseEnter={(e) => { 
-            e.currentTarget.style.background = "#FF3D71"; 
+            e.currentTarget.style.background = "var(--accent-red)"; 
             e.currentTarget.style.color = "#fff"; 
             e.currentTarget.style.boxShadow = "0 0 20px rgba(255, 61, 113, 0.4)"; 
           }}
           onMouseLeave={(e) => { 
             e.currentTarget.style.background = "rgba(255, 61, 113, 0.08)"; 
-            e.currentTarget.style.color = "#FF3D71"; 
+            e.currentTarget.style.color = "var(--accent-red)"; 
             e.currentTarget.style.boxShadow = "none"; 
           }}
           title="Logout"
