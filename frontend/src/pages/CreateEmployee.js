@@ -15,7 +15,7 @@ function CreateEmployee() {
   useEffect(() => { fetchDepartments(); }, []);
 
   const fetchDepartments = async () => {
-    try { const res = await axios.get("http://localhost:5000/api/employee/departments"); setDepartments(res.data); }
+    try { const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/employee/departments`); setDepartments(res.data); }
     catch (err) { console.log(err); }
   };
 
@@ -25,7 +25,7 @@ function CreateEmployee() {
     e.preventDefault();
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/employee/employees", formData);
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/employee/employees`, formData);
       alert(res.data.message || "Employee created successfully");
       setFormData({ name: "", email: "", department_id: "" });
     } catch (err) {
