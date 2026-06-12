@@ -143,7 +143,7 @@ function Sidebar({ user }) {
             background: "linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%)",
             borderRadius: "50%",
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#fff", fontWeight: "800", fontSize: "13px",
+            color: "var(--text-primary)", fontWeight: "800", fontSize: "13px",
             flexShrink: 0,
             boxShadow: "0 0 12px rgba(123, 97, 255, 0.3)"
           }}>

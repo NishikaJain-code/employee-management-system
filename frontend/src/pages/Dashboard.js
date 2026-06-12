@@ -102,7 +102,7 @@ function Dashboard() {
     background: "var(--bg-main)", 
     borderRadius: "16px", 
     border: "1px solid rgba(255,255,255,0.1)", 
-    color: "#fff", 
+    color: "var(--text-primary)", 
     boxShadow: "0 10px 20px rgba(0,0,0,0.5)",
     fontFamily: "'Outfit', sans-serif",
     fontSize: "13px"
@@ -137,7 +137,7 @@ function Dashboard() {
             <div style={{ fontSize: "13px", color: "var(--accent-cyan)", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "12px" }}>
               Enterprise HRMS
             </div>
-            <h1 style={{ fontSize: "38px", fontWeight: "800", color: "#fff", margin: "0 0 12px 0", letterSpacing: "-1px", lineHeight: 1.1 }}>
+            <h1 style={{ fontSize: "38px", fontWeight: "800", color: "var(--text-primary)", margin: "0 0 12px 0", letterSpacing: "-1px", lineHeight: 1.1 }}>
               Hello, <span style={{ background: "linear-gradient(135deg, var(--accent-cyan), var(--accent-blue))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{user?.name?.split(" ")[0] || "Admin"}</span> 👋
             </h1>
             <p style={{ fontSize: "15px", color: "var(--text-muted)", margin: "0 0 32px 0", lineHeight: "1.7", maxWidth: "480px" }}>
@@ -191,7 +191,7 @@ function Dashboard() {
               <div style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.8px" }}>
                 {stat.label}
               </div>
-              <div style={{ fontSize: "34px", fontWeight: "800", color: "#fff", lineHeight: 1 }}>
+              <div style={{ fontSize: "34px", fontWeight: "800", color: "var(--text-primary)", lineHeight: 1 }}>
                 {stat.value}
               </div>
               <div style={{ fontSize: "12px", color: stat.color, fontWeight: "600" }}>
@@ -217,7 +217,7 @@ function Dashboard() {
           <div style={{ fontSize: "14px", color: "var(--text-muted)", marginTop: "8px" }}>Total salary expenditure across all departments</div>
         </div>
         <div style={{ position: "relative", zIndex: 1, background: "rgba(255,0,229,0.08)", border: "1px solid rgba(255,0,229,0.15)", borderRadius: "20px", padding: "16px 24px", textAlign: "center" }}>
-          <div style={{ fontSize: "28px", fontWeight: "800", color: "#fff" }}>{employees.length}</div>
+          <div style={{ fontSize: "28px", fontWeight: "800", color: "var(--text-primary)" }}>{employees.length}</div>
           <div style={{ fontSize: "12px", color: "var(--accent-pink)", fontWeight: "600", marginTop: "4px" }}>ON PAYROLL</div>
         </div>
       </div>

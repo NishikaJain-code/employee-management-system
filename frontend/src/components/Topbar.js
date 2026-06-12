@@ -59,7 +59,7 @@ function Topbar({ user }) {
             borderRadius: "50px",
             outline: "none",
             fontSize: "14px",
-            color: "#e2e8f0",
+            color: "var(--text-primary)",
             transition: "all 0.3s ease",
             boxSizing: "border-box",
             fontFamily: "'Outfit', sans-serif"
@@ -99,7 +99,7 @@ function Topbar({ user }) {
             <span style={{
               position: "absolute", top: "1px", right: "1px",
               background: "var(--accent-pink)",
-              color: "#fff", width: "16px", height: "16px", borderRadius: "50%",
+              color: "var(--text-primary)", width: "16px", height: "16px", borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "9px", fontWeight: "800",
               boxShadow: "0 0 8px rgba(255, 0, 229, 0.6)"
@@ -147,7 +147,7 @@ function Topbar({ user }) {
             background: "linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%)", 
             borderRadius: "50%", 
             display: "flex", alignItems: "center", justifyContent: "center", 
-            color: "#fff", fontWeight: "800", fontSize: "15px",
+            color: "var(--text-primary)", fontWeight: "800", fontSize: "15px",
             boxShadow: "0 0 16px rgba(123, 97, 255, 0.35)",
             flexShrink: 0
           }}>

@@ -47,7 +47,7 @@ function SkillsMaster() {
             onKeyDown={(e) => e.key === "Enter" && addSkill()}
           />
           <button onClick={addSkill} style={{
-            background: "linear-gradient(135deg, var(--accent-purple), var(--accent-blue))", color: "#fff",
+            background: "linear-gradient(135deg, var(--accent-purple), var(--accent-blue))", color: "var(--text-primary)",
             border: "none", padding: "12px 28px", borderRadius: "50px", fontWeight: 800, fontSize: "14px",
             cursor: "pointer", fontFamily: "'Outfit', sans-serif", boxShadow: "0 4px 16px rgba(123,97,255,0.25)",
             whiteSpace: "nowrap", transition: "transform 0.2s"

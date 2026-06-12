@@ -48,7 +48,7 @@ function Navbar() {
 
   return (
     <nav style={{
-      background: "rgba(255, 255, 255, 0.9)",
+      background: "var(--bg-card)",
       backdropFilter: "blur(10px)",
       borderBottom: "1px solid rgba(108, 99, 255, 0.1)",
       padding: "16px 32px",
@@ -119,7 +119,7 @@ function Navbar() {
               top: "-8px",
               right: "-10px",
               background: "#ff4d4f",
-              color: "#fff",
+              color: "var(--text-primary)",
               borderRadius: "50%",
               padding: "2px 6px",
               fontSize: "10px",
@@ -154,7 +154,7 @@ function Navbar() {
           onClick={handleLogout}
           style={{
             background: "linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)",
-            color: "#fff",
+            color: "var(--text-primary)",
             border: "none",
             borderRadius: "12px",
             padding: "10px 18px",
@@ -176,7 +176,7 @@ function Navbar() {
 
 const linkStyle = {
   textDecoration: "none",
-  color: "#4a5568",
+  color: "var(--text-secondary)",
   fontSize: "14px",
   fontWeight: 600,
   transition: "color 0.2s",

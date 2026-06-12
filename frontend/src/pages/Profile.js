@@ -92,7 +92,7 @@ function Profile() {
               {profile.profile_pic ? (
                 <img src={profile.profile_pic.startsWith("http") ? profile.profile_pic : `http://localhost:5000${profile.profile_pic}`} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               ) : (
-                <span style={{ fontSize: "48px", color: "#fff", fontWeight: 800 }}>{profile.name ? profile.name.charAt(0).toUpperCase() : "👤"}</span>
+                <span style={{ fontSize: "48px", color: "var(--text-primary)", fontWeight: 800 }}>{profile.name ? profile.name.charAt(0).toUpperCase() : "👤"}</span>
               )}
               <label style={{ position: "absolute", bottom: 0, left: 0, right: 0, background: "rgba(0,0,0,0.7)", color: "var(--accent-cyan)", textAlign: "center", padding: "6px 0", fontSize: "11px", fontWeight: 800, cursor: "pointer" }}>
                 CHANGE <input type="file" accept="image/*" onChange={handleProfilePicUpload} style={{ display: "none" }} />

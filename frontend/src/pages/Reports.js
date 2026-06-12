@@ -92,7 +92,7 @@ function Reports() {
             <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} style={{ ...inputSt, colorScheme: "dark" }} />
           </>
         )}
-        <button onClick={fetchReport} style={{ padding: "10px 24px", borderRadius: "50px", border: "none", background: "linear-gradient(135deg, var(--accent-pink), var(--accent-purple))", color: "#fff", fontWeight: 800, cursor: "pointer", fontSize: "14px", fontFamily: "'Outfit', sans-serif" }}>🔄 Apply</button>
+        <button onClick={fetchReport} style={{ padding: "10px 24px", borderRadius: "50px", border: "none", background: "linear-gradient(135deg, var(--accent-pink), var(--accent-purple))", color: "var(--text-primary)", fontWeight: 800, cursor: "pointer", fontSize: "14px", fontFamily: "'Outfit', sans-serif" }}>🔄 Apply</button>
         <span style={{ marginLeft: "auto", fontSize: "13px", color: "var(--text-muted)", fontWeight: 600 }}>{total} record(s) found</span>
       </div>
 

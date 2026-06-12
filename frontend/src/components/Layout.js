@@ -16,7 +16,7 @@ function Layout({ children }) {
       display: "flex", 
       minHeight: "100vh", 
       background: "var(--bg-main)",
-      color: "#e2e8f0",
+      color: "var(--text-primary)",
       fontFamily: "'Outfit', sans-serif" 
     }}>
       <Sidebar user={userObj} />

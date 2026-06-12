@@ -64,7 +64,7 @@ function Signup() {
             width: "52px", height: "52px",
             background: "linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%)",
             borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#fff", fontWeight: "900", fontSize: "18px",
+            color: "var(--text-primary)", fontWeight: "900", fontSize: "18px",
             boxShadow: "0 0 24px rgba(123,97,255,0.35)"
           }}>IS</div>
         </div>

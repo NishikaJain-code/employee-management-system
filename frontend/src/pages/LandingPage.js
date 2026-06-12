@@ -32,7 +32,7 @@ function LandingPage() {
             background: "linear-gradient(135deg, var(--accent-cyan), var(--accent-blue))",
             borderRadius: "12px",
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#fff", fontWeight: "900", fontSize: "18px"
+            color: "var(--text-primary)", fontWeight: "900", fontSize: "18px"
           }}>IS</div>
           <span style={{ fontSize: "20px", fontWeight: "800", letterSpacing: "-0.5px" }}>HRMS<span style={{ color: "var(--accent-cyan)" }}>Pro</span></span>
         </div>
@@ -47,7 +47,7 @@ function LandingPage() {
           <Link to="/login" style={{ textDecoration: "none", color: "var(--text-primary)", fontWeight: "600", fontSize: "15px" }}>Log In</Link>
           <Link to="/signup" style={{
             background: "linear-gradient(135deg, var(--accent-cyan), var(--accent-blue))",
-            color: "#fff", padding: "10px 24px", borderRadius: "50px", textDecoration: "none",
+            color: "var(--text-primary)", padding: "10px 24px", borderRadius: "50px", textDecoration: "none",
             fontWeight: "700", fontSize: "15px", boxShadow: "0 4px 14px rgba(0, 184, 255, 0.4)"
           }}>Get Started</Link>
         </div>
