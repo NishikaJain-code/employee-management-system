@@ -1,117 +1,108 @@
 import { useEffect, useState } from "react";
 import api from "../utils/api";
 
+const card = { background: "rgba(18,25,38,0.5)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" };
+
+const statusBadge = (status) => {
+  if (status === "Approved") return { background: "rgba(0,255,194,0.1)", color: "#00FFC2", border: "1px solid rgba(0,255,194,0.2)" };
+  if (status === "Rejected") return { background: "rgba(255,61,113,0.1)", color: "#FF3D71", border: "1px solid rgba(255,61,113,0.2)" };
+  return { background: "rgba(255,184,0,0.1)", color: "#FFB800", border: "1px solid rgba(255,184,0,0.2)" };
+};
+
 function LeaveApproval() {
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchLeaves();
-  }, []);
+  useEffect(() => { fetchLeaves(); }, []);
 
   const fetchLeaves = async () => {
     try {
       setLoading(true);
-      // Fixed: was /api/leave/all (wrong), now /api/leaves/all (correct)
       const res = await api.get("/api/leaves/all");
       setLeaves(res.data);
     } catch (err) {
-      console.error("Fetch leaves error:", err);
+      console.error(err);
       alert("Error fetching leaves. Are you logged in with the right role?");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const approveLeave = async (id) => {
     const remarks = window.prompt("Enter approval remarks (optional):", "Approved by manager");
-    try {
-      // Fixed: was PUT /api/leave/approve/:id, now POST /api/leaves/approve/:id
-      await api.post(`/api/leaves/approve/${id}`, { remarks });
-      alert("✅ Leave Approved successfully!");
-      fetchLeaves();
-    } catch (err) {
-      console.error("Approve leave error:", err);
-      alert(err.response?.data?.message || "Error approving leave.");
-    }
+    try { await api.post(`/api/leaves/approve/${id}`, { remarks }); alert("✅ Leave Approved!"); fetchLeaves(); }
+    catch (err) { alert(err.response?.data?.message || "Error approving leave."); }
   };
 
   const rejectLeave = async (id) => {
     const remarks = window.prompt("Enter rejection reason:", "Does not meet leave policy.");
-    try {
-      // Fixed: was PUT /api/leave/reject/:id, now POST /api/leaves/reject/:id
-      await api.post(`/api/leaves/reject/${id}`, { remarks });
-      alert("❌ Leave Rejected.");
-      fetchLeaves();
-    } catch (err) {
-      console.error("Reject leave error:", err);
-      alert(err.response?.data?.message || "Error rejecting leave.");
-    }
-  };
-
-  const statusColor = (status) => {
-    if (status === "Approved") return { background: "#f0fff4", color: "#38a169" };
-    if (status === "Rejected") return { background: "#fff5f5", color: "#e53e3e" };
-    return { background: "#fffbea", color: "#d69e2e" };
+    try { await api.post(`/api/leaves/reject/${id}`, { remarks }); alert("❌ Leave Rejected."); fetchLeaves(); }
+    catch (err) { alert(err.response?.data?.message || "Error rejecting leave."); }
   };
 
   return (
-    <div style={{ padding: "32px", fontFamily: "'Segoe UI', sans-serif", background: "#f0f4ff", minHeight: "100vh" }}>
-      <div style={{
-        background: "linear-gradient(135deg,#667eea,#764ba2)",
-        borderRadius: "16px",
-        padding: "24px 28px",
-        color: "#fff",
-        marginBottom: "28px"
-      }}>
-        <h2 style={{ margin: 0 }}>📋 Manager Leave Approval</h2>
-        <p style={{ margin: "6px 0 0", opacity: 0.85 }}>Review and action pending leave applications</p>
+    <div style={{ fontFamily: "'Outfit', sans-serif", paddingBottom: "40px" }}>
+      <div style={{ ...card, padding: "28px 32px", marginBottom: "24px", background: "linear-gradient(135deg, rgba(123,97,255,0.12) 0%, rgba(0,184,255,0.08) 100%)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: "#f1f5f9" }}>Manager Leave Approval</h2>
+          <p style={{ margin: "6px 0 0", color: "#64748b", fontSize: "14px" }}>Review and action pending leave applications</p>
+        </div>
+        <div style={{ fontSize: "40px" }}>📋</div>
       </div>
 
       {loading ? (
-        <p style={{ textAlign: "center", color: "#6c63ff" }}>⏳ Loading...</p>
+        <div style={{ textAlign: "center", color: "#64748b", padding: "60px" }}>Loading...</div>
       ) : (
-        <div style={{ background: "#fff", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
+        <div style={{ ...card, overflow: "hidden" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "14px" }}>
             <thead>
-              <tr style={{ background: "#f0f4ff" }}>
+              <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
                 {["ID", "Employee", "Leave Type", "From", "To", "Days", "Status", "Action"].map((h) => (
-                  <th key={h} style={{ padding: "14px 16px", textAlign: "left", color: "#555", fontWeight: 600 }}>{h}</th>
+                  <th key={h} style={{ padding: "16px", textAlign: "left", color: "#64748b", fontWeight: 700, fontSize: "12px", textTransform: "uppercase", letterSpacing: "0.5px" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {leaves.map((leave) => (
-                <tr key={leave.id} style={{ borderBottom: "1px solid #eee" }}>
-                  <td style={{ padding: "12px 16px", color: "#999" }}>#{leave.id}</td>
-                  <td style={{ padding: "12px 16px", fontWeight: 600, color: "#2d3748" }}>{leave.employee_name}</td>
-                  <td style={{ padding: "12px 16px", color: "#555" }}>{leave.leave_name}</td>
-                  <td style={{ padding: "12px 16px", color: "#555" }}>{new Date(leave.from_date).toLocaleDateString()}</td>
-                  <td style={{ padding: "12px 16px", color: "#555" }}>{new Date(leave.to_date).toLocaleDateString()}</td>
-                  <td style={{ padding: "12px 16px", fontWeight: 600 }}>{leave.total_days}</td>
-                  <td style={{ padding: "12px 16px" }}>
-                    <span style={{ ...statusColor(leave.status), padding: "4px 12px", borderRadius: "20px", fontWeight: 600, fontSize: "12px" }}>
+                <tr key={leave.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.02)"}
+                  onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                >
+                  <td style={{ padding: "14px 16px", color: "#64748b", fontWeight: 600 }}>#{leave.id}</td>
+                  <td style={{ padding: "14px 16px", fontWeight: 700, color: "#f1f5f9" }}>{leave.employee_name}</td>
+                  <td style={{ padding: "14px 16px", color: "#94a3b8" }}>{leave.leave_name}</td>
+                  <td style={{ padding: "14px 16px", color: "#94a3b8" }}>{new Date(leave.from_date).toLocaleDateString()}</td>
+                  <td style={{ padding: "14px 16px", color: "#94a3b8" }}>{new Date(leave.to_date).toLocaleDateString()}</td>
+                  <td style={{ padding: "14px 16px", fontWeight: 700, color: "#f1f5f9" }}>{leave.total_days}</td>
+                  <td style={{ padding: "14px 16px" }}>
+                    <span style={{ ...statusBadge(leave.status), padding: "5px 14px", borderRadius: "50px", fontWeight: 700, fontSize: "12px" }}>
                       {leave.status}
                     </span>
                   </td>
-                  <td style={{ padding: "12px 16px" }}>
+                  <td style={{ padding: "14px 16px" }}>
                     {leave.status === "Pending" && (
                       <div style={{ display: "flex", gap: "8px" }}>
                         <button onClick={() => approveLeave(leave.id)} style={{
-                          background: "#38a169", color: "#fff", border: "none",
-                          padding: "6px 14px", borderRadius: "8px", cursor: "pointer", fontSize: "12px"
-                        }}>✅ Approve</button>
+                          background: "rgba(0,255,194,0.1)", color: "#00FFC2", border: "1px solid rgba(0,255,194,0.2)",
+                          padding: "7px 16px", borderRadius: "50px", cursor: "pointer", fontSize: "12px", fontWeight: 700, fontFamily: "'Outfit', sans-serif",
+                          transition: "all 0.2s"
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = "#00FFC2"; e.currentTarget.style.color = "#080B13"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,255,194,0.1)"; e.currentTarget.style.color = "#00FFC2"; }}
+                        >✓ Approve</button>
                         <button onClick={() => rejectLeave(leave.id)} style={{
-                          background: "#e53e3e", color: "#fff", border: "none",
-                          padding: "6px 14px", borderRadius: "8px", cursor: "pointer", fontSize: "12px"
-                        }}>❌ Reject</button>
+                          background: "rgba(255,61,113,0.1)", color: "#FF3D71", border: "1px solid rgba(255,61,113,0.2)",
+                          padding: "7px 16px", borderRadius: "50px", cursor: "pointer", fontSize: "12px", fontWeight: 700, fontFamily: "'Outfit', sans-serif",
+                          transition: "all 0.2s"
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = "#FF3D71"; e.currentTarget.style.color = "#fff"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,61,113,0.1)"; e.currentTarget.style.color = "#FF3D71"; }}
+                        >✗ Reject</button>
                       </div>
                     )}
                   </td>
                 </tr>
               ))}
               {leaves.length === 0 && (
-                <tr><td colSpan={8} style={{ textAlign: "center", padding: "24px", color: "#aaa" }}>No leave applications found.</td></tr>
+                <tr><td colSpan={8} style={{ textAlign: "center", padding: "48px", color: "#64748b" }}>No leave applications found.</td></tr>
               )}
             </tbody>
           </table>

@@ -15,12 +15,12 @@ function Layout({ children }) {
     <div style={{ 
       display: "flex", 
       minHeight: "100vh", 
-      background: "#0B0F19",
+      background: "#05070a",
       color: "#e2e8f0",
       fontFamily: "'Outfit', sans-serif" 
     }}>
       <Sidebar user={userObj} />
-      <div style={{ flex: 1, marginLeft: "280px", display: "flex", flexDirection: "column" }}>
+      <div style={{ flex: 1, marginLeft: "260px", display: "flex", flexDirection: "column" }}>
         <Topbar user={userObj} />
         <main style={{ padding: "32px", overflowY: "auto", flex: 1 }}>
           {children}

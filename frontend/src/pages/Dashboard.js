@@ -2,12 +2,10 @@ import { useEffect, useState } from "react";
 import api from "../utils/api";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line
+  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area
 } from "recharts";
 
-  const COLORS = ['#00FFC2', '#00B8FF', '#FF00E5', '#7B61FF', '#FFB800', '#FF3D71'];
-
-  // Data mapping...
+const COLORS = ['#00FFC2', '#00B8FF', '#FF00E5', '#7B61FF', '#FFB800', '#FF3D71'];
 
 function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -39,225 +37,306 @@ function Dashboard() {
     }
   };
 
-  // Computations for graphs
-  // 1. Department Distribution
+  // === Data computations ===
   const deptCount = {};
-  // 2. Location Breakdown
   const locationCount = {};
-  // 3. Average & Total Salary by Dept
   const deptSalary = {};
-  // 4. Hiring Growth Trend (Cumulative)
   const hiringDataMap = {};
 
   employees.forEach(emp => {
-    // Dept count
     const dName = emp.department_name || "Unassigned";
     deptCount[dName] = (deptCount[dName] || 0) + 1;
 
-    // Location
-    const loc = emp.address || "Unknown";
-    locationCount[loc] = (locationCount[loc] || 0) + 1;
+    const loc = (emp.address || "Unknown").split(",")[0].trim();
+    if (loc) locationCount[loc] = (locationCount[loc] || 0) + 1;
 
-    // Salary
     const sal = parseFloat(emp.salary) || 0;
     if (!deptSalary[dName]) deptSalary[dName] = { total: 0, count: 0 };
     deptSalary[dName].total += sal;
     deptSalary[dName].count += 1;
 
-    // Hiring trend
     if (emp.joining_date) {
-      const monthYear = new Date(emp.joining_date).toISOString().substring(0, 7); // YYYY-MM
+      const monthYear = new Date(emp.joining_date).toISOString().substring(0, 7);
       hiringDataMap[monthYear] = (hiringDataMap[monthYear] || 0) + 1;
     }
   });
 
   const deptDistributionData = Object.keys(deptCount).map(k => ({ name: k, value: deptCount[k] }));
-  const locationData = Object.keys(locationCount).map(k => ({ name: k, count: locationCount[k] }));
+  const locationData = Object.keys(locationCount)
+    .sort((a, b) => locationCount[b] - locationCount[a])
+    .slice(0, 8)
+    .map(k => ({ name: k, count: locationCount[k] }));
   const salaryData = Object.keys(deptSalary).map(k => ({
     name: k,
     avgSalary: Math.round(deptSalary[k].total / deptSalary[k].count),
     totalPayroll: deptSalary[k].total
   }));
 
-  // Sort and accumulate hiring data
   const sortedMonths = Object.keys(hiringDataMap).sort();
   let cumulative = 0;
   const hiringTrendData = sortedMonths.map(m => {
     cumulative += hiringDataMap[m];
-    return { month: m, employees: cumulative };
+    return { month: m.substring(5), employees: cumulative };
   });
 
-  // Leave Mix
   const leaveMixData = stats?.leaveTypeUsage?.map(lt => ({
     name: lt.leave_name,
     value: parseInt(lt.total_days) || 0
   })) || [];
 
-  const statCardStyle = {
-    background: "#080B13",
-    borderRadius: "20px",
-    padding: "24px",
-    flex: "1",
-    minWidth: "200px",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+  // === Styles ===
+  const bentoCard = {
+    background: "rgba(18, 25, 38, 0.5)",
+    backdropFilter: "blur(40px)",
+    WebkitBackdropFilter: "blur(40px)",
+    borderRadius: "28px",
+    padding: "28px",
+    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
     border: "1px solid rgba(255, 255, 255, 0.05)",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+    transition: "border-color 0.3s ease",
+    position: "relative",
+    overflow: "hidden"
   };
 
-  const graphCardStyle = {
-    background: "#080B13",
-    borderRadius: "20px",
-    padding: "24px",
-    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
-    border: "1px solid rgba(255, 255, 255, 0.05)",
-    marginBottom: "24px",
-    transition: "all 0.3s ease"
+  const tooltipStyle = {
+    background: "#080B13", 
+    borderRadius: "16px", 
+    border: "1px solid rgba(255,255,255,0.1)", 
+    color: "#fff", 
+    boxShadow: "0 10px 20px rgba(0,0,0,0.5)",
+    fontFamily: "'Outfit', sans-serif",
+    fontSize: "13px"
   };
 
-  if (loading) return <div style={{ padding: "40px", color: "#4a5568" }}>Loading dashboard analytics...</div>;
-  if (error) return <div style={{ padding: "40px", color: "#e53e3e" }}>{error}</div>;
+  const axisStyle = { fontSize: 12, fill: "#94a3b8" };
+
+  if (loading) return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "60vh", flexDirection: "column", gap: "16px" }}>
+      <div style={{ width: "48px", height: "48px", border: "3px solid rgba(0,255,194,0.2)", borderTopColor: "#00FFC2", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
+      <div style={{ color: "#64748b", fontSize: "15px" }}>Initializing Dashboard...</div>
+    </div>
+  );
+
+  if (error) return <div style={{ padding: "40px", color: "#FF3D71", fontSize: "15px" }}>⚠️ {error}</div>;
 
   return (
-    <div style={{ paddingBottom: "40px" }}>
-      <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#f8fafc", marginBottom: "32px", letterSpacing: "-0.5px" }}>
-        System Overview
-      </h1>
+    <div style={{ paddingBottom: "60px" }}>
 
-      {/* Top Stat Cards */}
-      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "32px" }}>
-        <div style={statCardStyle} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.borderColor = "#00FFC2"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)"; }}>
-          <div style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Total Employees</div>
-          <div style={{ fontSize: "36px", fontWeight: "800", color: "#f8fafc", marginTop: "8px" }}>
-            {stats?.summary?.totalEmployees || 0}
-          </div>
-          <div style={{ fontSize: "13px", color: "#00FFC2", marginTop: "8px", fontWeight: "600" }}>Active workforce</div>
-        </div>
+      {/* ========== BENTO HERO SECTION ========== */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: "20px", marginBottom: "20px" }}>
         
-        <div style={statCardStyle} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.borderColor = "#FFB800"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)"; }}>
-          <div style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Pending Leaves</div>
-          <div style={{ fontSize: "36px", fontWeight: "800", color: "#f8fafc", marginTop: "8px" }}>
-            {stats?.summary?.pendingLeaves || 0}
+        {/* Hero Welcome Card — 8 cols */}
+        <div style={{ ...bentoCard, gridColumn: "span 8" }}>
+          {/* Glow orb */}
+          <div style={{
+            position: "absolute", top: "-80px", right: "-60px", width: "320px", height: "320px",
+            background: "radial-gradient(circle, rgba(0,255,194,0.12) 0%, transparent 70%)",
+            borderRadius: "50%", pointerEvents: "none"
+          }} />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div style={{ fontSize: "13px", color: "#00FFC2", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "12px" }}>
+              Enterprise HRMS
+            </div>
+            <h1 style={{ fontSize: "38px", fontWeight: "800", color: "#fff", margin: "0 0 12px 0", letterSpacing: "-1px", lineHeight: 1.1 }}>
+              Hello, <span style={{ background: "linear-gradient(135deg, #00FFC2, #00B8FF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{user?.name?.split(" ")[0] || "Admin"}</span> 👋
+            </h1>
+            <p style={{ fontSize: "15px", color: "#64748b", margin: "0 0 32px 0", lineHeight: "1.7", maxWidth: "480px" }}>
+              Your workforce is active and healthy. You have{" "}
+              <span style={{ color: "#FFB800", fontWeight: "700" }}>{stats?.summary?.pendingLeaves || 0} pending approvals</span>{" "}
+              that need your attention today.
+            </p>
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+              <button style={{
+                background: "linear-gradient(135deg, #00FFC2, #00B8FF)", color: "#080B13",
+                border: "none", padding: "13px 28px", borderRadius: "50px", fontSize: "14px",
+                fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 20px rgba(0, 255, 194, 0.3)",
+                transition: "transform 0.2s, box-shadow 0.2s", letterSpacing: "0.3px"
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "scale(1.04)"; e.currentTarget.style.boxShadow = "0 6px 28px rgba(0, 255, 194, 0.45)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(0, 255, 194, 0.3)"; }}>
+                Review Approvals →
+              </button>
+              <button style={{
+                background: "rgba(255,255,255,0.05)", color: "#94a3b8",
+                border: "1px solid rgba(255,255,255,0.1)", padding: "13px 28px",
+                borderRadius: "50px", fontSize: "14px", fontWeight: "700", cursor: "pointer",
+                transition: "all 0.2s"
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.05)"; e.currentTarget.style.color = "#94a3b8"; }}>
+                View Reports
+              </button>
+            </div>
           </div>
-          <div style={{ fontSize: "13px", color: "#FFB800", marginTop: "8px", fontWeight: "600" }}>Needs action</div>
         </div>
 
-        <div style={statCardStyle} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.borderColor = "#00B8FF"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)"; }}>
-          <div style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Allocated Assets</div>
-          <div style={{ fontSize: "36px", fontWeight: "800", color: "#f8fafc", marginTop: "8px" }}>
-            {stats?.summary?.assignedAssets || 0}
-          </div>
-          <div style={{ fontSize: "13px", color: "#00B8FF", marginTop: "8px", fontWeight: "600" }}>Total tracked items</div>
+        {/* Quick stats — 4 cols (2x2 mini grid) */}
+        <div style={{ gridColumn: "span 4", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+          
+          {[
+            { label: "Total Staff", value: stats?.summary?.totalEmployees || 0, color: "#00FFC2", sub: "Active employees" },
+            { label: "Pending Leaves", value: stats?.summary?.pendingLeaves || 0, color: "#FFB800", sub: "Awaiting action" },
+            { label: "Assets Tracked", value: stats?.summary?.assignedAssets || 0, color: "#00B8FF", sub: "Allocated items" },
+            { label: "Departments", value: deptDistributionData.length, color: "#7B61FF", sub: "Active units" },
+          ].map((stat, i) => (
+            <div key={i} style={{
+              ...bentoCard,
+              padding: "20px",
+              display: "flex", flexDirection: "column", justifyContent: "space-between",
+              borderRadius: "24px"
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = stat.color + "40"}
+            onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)"}
+            >
+              <div style={{ fontSize: "11px", color: "#64748b", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.8px" }}>
+                {stat.label}
+              </div>
+              <div style={{ fontSize: "34px", fontWeight: "800", color: "#fff", lineHeight: 1 }}>
+                {stat.value}
+              </div>
+              <div style={{ fontSize: "12px", color: stat.color, fontWeight: "600" }}>
+                {stat.sub}
+              </div>
+            </div>
+          ))}
         </div>
+      </div>
 
-        <div style={statCardStyle} onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-5px)"; e.currentTarget.style.borderColor = "#FF00E5"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.05)"; }}>
-          <div style={{ fontSize: "13px", color: "#94a3b8", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.5px" }}>Monthly Salary</div>
-          <div style={{ fontSize: "36px", fontWeight: "800", color: "#f8fafc", marginTop: "8px", background: "linear-gradient(135deg, #FF00E5 0%, #7B61FF 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+      {/* ========== PAYROLL HERO CARD (Full width) ========== */}
+      <div style={{ ...bentoCard, marginBottom: "20px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "16px" }}>
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+          background: "linear-gradient(135deg, rgba(255,0,229,0.06) 0%, rgba(123,97,255,0.06) 100%)",
+          borderRadius: "inherit", pointerEvents: "none"
+        }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ fontSize: "12px", color: "#FF00E5", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "8px" }}>Monthly Payroll</div>
+          <div style={{ fontSize: "48px", fontWeight: "900", background: "linear-gradient(135deg, #FF00E5 0%, #7B61FF 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", letterSpacing: "-2px", lineHeight: 1 }}>
             ₹{Number(stats?.summary?.totalSalaryExpense || 0).toLocaleString("en-IN")}
           </div>
-          <div style={{ fontSize: "13px", color: "#FF00E5", marginTop: "8px", fontWeight: "600" }}>Current baseline</div>
+          <div style={{ fontSize: "14px", color: "#64748b", marginTop: "8px" }}>Total salary expenditure across all departments</div>
+        </div>
+        <div style={{ position: "relative", zIndex: 1, background: "rgba(255,0,229,0.08)", border: "1px solid rgba(255,0,229,0.15)", borderRadius: "20px", padding: "16px 24px", textAlign: "center" }}>
+          <div style={{ fontSize: "28px", fontWeight: "800", color: "#fff" }}>{employees.length}</div>
+          <div style={{ fontSize: "12px", color: "#FF00E5", fontWeight: "600", marginTop: "4px" }}>ON PAYROLL</div>
         </div>
       </div>
 
       {user.role !== "employee" && (
         <>
-          {/* Row 1: Dept Strength & Leave Mix */}
-          <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
-            <div style={{ ...graphCardStyle, flex: 2, minWidth: "400px" }}>
-              <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Department Strength</h3>
+          {/* ========== ROW: Workforce Growth + Department Pie ========== */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: "20px", marginBottom: "20px" }}>
+
+            <div style={{ ...bentoCard, gridColumn: "span 8" }}>
+              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Workforce Growth Trend</h3>
               <div style={{ height: "300px" }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={deptDistributionData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="name" tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
-                    <Tooltip cursor={{fill: "rgba(255,255,255,0.02)"}} contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
-                    <Bar dataKey="value" fill="#00FFC2" radius={[4, 4, 0, 0]} barSize={40} />
-                  </BarChart>
+                  <AreaChart data={hiringTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#00B8FF" stopOpacity={0.35}/>
+                        <stop offset="95%" stopColor="#00B8FF" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="month" tick={axisStyle} axisLine={false} tickLine={false} />
+                    <YAxis tick={axisStyle} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Area type="monotone" dataKey="employees" stroke="#00B8FF" strokeWidth={3} fillOpacity={1} fill="url(#areaGrad)" />
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            <div style={{ ...graphCardStyle, flex: 1, minWidth: "300px" }}>
-              <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Leave Mix</h3>
+            <div style={{ ...bentoCard, gridColumn: "span 4" }}>
+              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Department Mix</h3>
               <div style={{ height: "300px" }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={leaveMixData} innerRadius={70} outerRadius={100} paddingAngle={5} dataKey="value" stroke="none">
-                      {leaveMixData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Pie data={deptDistributionData} innerRadius={75} outerRadius={110} paddingAngle={6} dataKey="value" stroke="none" cornerRadius={8}>
+                      {deptDistributionData.map((_, index) => (
+                        <Cell key={index} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
-                    <Legend iconType="circle" wrapperStyle={{fontSize: "12px", color: "#cbd5e1"}} />
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Legend iconType="circle" wrapperStyle={{fontSize: "12px", color: "#94a3b8"}} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
             </div>
+
           </div>
 
-          {/* Row 2: Hiring Trend */}
-          <div style={graphCardStyle}>
-            <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Hiring Growth Trend</h3>
-            <div style={{ height: "300px" }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={hiringTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="month" tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
-                  <YAxis tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
-                  <Line type="monotone" dataKey="employees" stroke="#00B8FF" strokeWidth={3} dot={{r: 4, fill: "#00B8FF", strokeWidth: 2, stroke: "#080B13"}} activeDot={{r: 6, fill: "#fff"}} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Row 3: Salary & Payroll Analysis */}
-          <div style={{ display: "flex", gap: "24px", flexWrap: "wrap" }}>
-            <div style={{ ...graphCardStyle, flex: 1, minWidth: "400px" }}>
-              <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Average Salary By Department (₹)</h3>
-              <div style={{ height: "300px" }}>
+          {/* ========== ROW: Leave Mix + Avg Salary ========== */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "20px" }}>
+            
+            <div style={bentoCard}>
+              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Leave Type Usage</h3>
+              <div style={{ height: "280px" }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={salaryData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="name" tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
-                    <Tooltip cursor={{fill: "rgba(255,255,255,0.02)"}} contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
-                    <Bar dataKey="avgSalary" fill="#FF00E5" radius={[4, 4, 0, 0]} barSize={30} />
+                  <PieChart>
+                    <Pie data={leaveMixData} innerRadius={70} outerRadius={105} paddingAngle={6} dataKey="value" stroke="none" cornerRadius={6}>
+                      {leaveMixData.map((_, index) => (
+                        <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={tooltipStyle} />
+                    <Legend iconType="circle" wrapperStyle={{fontSize: "12px", color: "#94a3b8"}} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div style={bentoCard}>
+              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Avg Salary by Department (₹)</h3>
+              <div style={{ height: "280px" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={salaryData} layout="vertical" margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.04)" />
+                    <XAxis type="number" tick={axisStyle} axisLine={false} tickLine={false} />
+                    <YAxis dataKey="name" type="category" tick={axisStyle} axisLine={false} tickLine={false} width={80} />
+                    <Tooltip cursor={{fill: "rgba(255,255,255,0.02)"}} contentStyle={tooltipStyle} />
+                    <Bar dataKey="avgSalary" fill="#7B61FF" radius={[0, 20, 20, 0]} barSize={20} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            <div style={{ ...graphCardStyle, flex: 1, minWidth: "400px" }}>
-              <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Payroll Cost Analysis By Department (₹)</h3>
-              <div style={{ height: "300px" }}>
+          </div>
+
+          {/* ========== ROW: Total Payroll by Dept + Location ========== */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+
+            <div style={bentoCard}>
+              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Payroll Cost by Department (₹)</h3>
+              <div style={{ height: "280px" }}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={salaryData} margin={{ top: 10, right: 10, left: 20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="name" tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
-                    <YAxis tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
-                    <Tooltip cursor={{fill: "rgba(255,255,255,0.02)"}} contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
-                    <Bar dataKey="totalPayroll" fill="#7B61FF" radius={[4, 4, 0, 0]} barSize={30} />
+                  <BarChart data={salaryData} margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="name" tick={axisStyle} axisLine={false} tickLine={false} />
+                    <YAxis tick={axisStyle} axisLine={false} tickLine={false} />
+                    <Tooltip cursor={{fill:"rgba(255,255,255,0.02)"}} contentStyle={tooltipStyle} />
+                    <Bar dataKey="totalPayroll" fill="#FF00E5" radius={[16, 16, 0, 0]} barSize={28} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
-          </div>
 
-          {/* Row 4: Location Breakdown */}
-          <div style={graphCardStyle}>
-            <h3 style={{ fontSize: "15px", color: "#cbd5e1", marginBottom: "20px" }}>Location Breakdown (Top Cities)</h3>
-            <div style={{ height: "300px" }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={locationData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="name" tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
-                  <YAxis tick={{fontSize: 12, fill: "#94a3b8"}} axisLine={false} tickLine={false} />
-                  <Tooltip cursor={{fill: "rgba(255,255,255,0.02)"}} contentStyle={{background: "#080B13", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", boxShadow: "0 4px 12px rgba(0,0,0,0.5)"}} />
-                  <Bar dataKey="count" fill="#FFB800" radius={[4, 4, 0, 0]} barSize={40} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div style={bentoCard}>
+              <h3 style={{ fontSize: "17px", color: "#f1f5f9", fontWeight: "700", margin: "0 0 24px 0" }}>Geographic Distribution</h3>
+              <div style={{ height: "280px" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={locationData} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                    <XAxis dataKey="name" tick={axisStyle} axisLine={false} tickLine={false} />
+                    <YAxis tick={axisStyle} axisLine={false} tickLine={false} />
+                    <Tooltip cursor={{fill:"rgba(255,255,255,0.02)"}} contentStyle={tooltipStyle} />
+                    <Bar dataKey="count" fill="#FFB800" radius={[16, 16, 0, 0]} barSize={28} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
+
           </div>
         </>
       )}

@@ -16,17 +16,14 @@ function Sidebar({ user }) {
     { name: "Profile", path: "/profile", icon: <UserCircle size={18} /> },
     { name: "Documents", path: "/upload", icon: <Upload size={18} /> },
     
-    // Employee
     ...(user?.role === "employee" ? [
       { name: "Apply Leave", path: "/apply-leave", icon: <FileCheck size={18} /> }
     ] : []),
 
-    // Manager / HR / Admin
     ...(isManager || isAdminOrHr ? [
       { name: "Manager Approvals", path: "/leave-approval", icon: <ShieldCheck size={18} /> }
     ] : []),
 
-    // Admin / HR
     ...(isAdminOrHr ? [
       { name: "HR Approvals", path: "/hr-approval", icon: <ShieldCheck size={18} /> },
       { name: "Employees", path: "/employees", icon: <Users size={18} /> },
@@ -37,15 +34,21 @@ function Sidebar({ user }) {
 
     { name: "Assets", path: "/assets", icon: <Box size={18} /> },
 
-    // Reports
     ...(isAdminOrHr || isManager ? [
       { name: "Reports", path: "/reports", icon: <BarChart3 size={18} /> }
     ] : []),
   ];
 
+  // Group nav items visually
+  const sections = [
+    { label: "Main", items: navItems.slice(0, 3) },
+    { label: "Workflow", items: navItems.slice(3, navItems.length - 2) },
+    { label: "Data", items: navItems.slice(navItems.length - 2) },
+  ].filter(s => s.items.length > 0);
+
   return (
     <aside style={{
-      width: "280px",
+      width: "260px",
       background: "#080B13",
       borderRight: "1px solid rgba(255, 255, 255, 0.05)",
       color: "#94a3b8",
@@ -56,28 +59,32 @@ function Sidebar({ user }) {
       left: 0,
       top: 0,
       zIndex: 1000,
-      fontFamily: "'Outfit', sans-serif"
+      fontFamily: "'Outfit', sans-serif",
+      overflowY: "auto"
     }}>
-      <div style={{ padding: "32px 24px", display: "flex", alignItems: "center", gap: "16px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      {/* Logo */}
+      <div style={{ padding: "28px 20px 24px", display: "flex", alignItems: "center", gap: "14px", borderBottom: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
         <div style={{ 
-          width: "40px", height: "40px", 
+          width: "38px", height: "38px", 
           background: "linear-gradient(135deg, #00FFC2 0%, #00B8FF 100%)", 
           borderRadius: "12px", 
           display: "flex", alignItems: "center", justifyContent: "center", 
-          color: "#080B13", fontWeight: "800", fontSize: "16px",
-          boxShadow: "0 4px 15px rgba(0, 255, 194, 0.3)"
+          color: "#080B13", fontWeight: "900", fontSize: "14px",
+          boxShadow: "0 0 20px rgba(0, 255, 194, 0.25)",
+          flexShrink: 0
         }}>
           IS
         </div>
         <div>
-          <div style={{ color: "#fff", fontWeight: "800", fontSize: "18px", letterSpacing: "0.5px" }}>i-SOFTZONE</div>
-          <div style={{ fontSize: "12px", color: "#00FFC2", fontWeight: "600", letterSpacing: "1px", textTransform: "uppercase" }}>Enterprise HRMS</div>
+          <div style={{ color: "#f1f5f9", fontWeight: "800", fontSize: "17px", letterSpacing: "0.3px", lineHeight: 1.1 }}>i-SOFTZONE</div>
+          <div style={{ fontSize: "11px", color: "#00FFC2", fontWeight: "600", letterSpacing: "1.5px", textTransform: "uppercase", marginTop: "3px" }}>Enterprise HRMS</div>
         </div>
       </div>
 
-      <div style={{ padding: "24px 16px", display: "flex", flexDirection: "column", gap: "8px", overflowY: "auto" }}>
+      {/* Nav Sections */}
+      <div style={{ padding: "20px 12px", display: "flex", flexDirection: "column", gap: "6px", flex: 1 }}>
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + "/");
           return (
             <Link
               key={item.path}
@@ -85,37 +92,35 @@ function Sidebar({ user }) {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "14px",
-                padding: "14px 18px",
+                gap: "12px",
+                padding: "11px 16px",
                 textDecoration: "none",
-                borderRadius: "12px",
-                fontSize: "15px",
+                borderRadius: "50px",   // PILL SHAPE — not rectangle
+                fontSize: "14px",
                 fontWeight: isActive ? "700" : "500",
-                color: isActive ? "#fff" : "#64748b",
-                background: isActive ? "rgba(0, 255, 194, 0.1)" : "transparent",
-                borderLeft: isActive ? "4px solid #00FFC2" : "4px solid transparent",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                boxShadow: isActive ? "inset 2px 0 10px rgba(0, 255, 194, 0.05)" : "none"
+                color: isActive ? "#080B13" : "#64748b",
+                background: isActive 
+                  ? "linear-gradient(135deg, #00FFC2 0%, #00B8FF 100%)"
+                  : "transparent",
+                boxShadow: isActive ? "0 4px 16px rgba(0, 255, 194, 0.25)" : "none",
+                transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
               }}
               onMouseEnter={(e) => { 
                 if (!isActive) { 
                   e.currentTarget.style.color = "#e2e8f0"; 
-                  e.currentTarget.style.background = "rgba(255,255,255,0.02)"; 
-                  e.currentTarget.style.transform = "translateX(4px)";
+                  e.currentTarget.style.background = "rgba(255,255,255,0.04)"; 
                 } 
               }}
               onMouseLeave={(e) => { 
                 if (!isActive) { 
                   e.currentTarget.style.color = "#64748b"; 
                   e.currentTarget.style.background = "transparent"; 
-                  e.currentTarget.style.transform = "translateX(0px)";
                 } 
               }}
             >
               <span style={{ 
-                color: isActive ? "#00FFC2" : "inherit",
-                transition: "transform 0.3s ease",
-                transform: isActive ? "scale(1.1)" : "scale(1)"
+                flexShrink: 0,
+                color: isActive ? "#080B13" : "#64748b",
               }}>
                 {item.icon}
               </span>
@@ -125,19 +130,33 @@ function Sidebar({ user }) {
         })}
       </div>
       
-      <div style={{ marginTop: "auto", padding: "24px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+      {/* Footer Badge */}
+      <div style={{ padding: "16px 12px 24px", borderTop: "1px solid rgba(255,255,255,0.05)", flexShrink: 0 }}>
         <div style={{ 
-          display: "flex", alignItems: "center", gap: "12px", padding: "16px", 
-          background: "rgba(0, 255, 194, 0.05)", borderRadius: "14px",
-          border: "1px solid rgba(0, 255, 194, 0.1)"
+          display: "flex", alignItems: "center", gap: "10px", padding: "14px 16px", 
+          background: "rgba(0, 255, 194, 0.04)", 
+          borderRadius: "20px",
+          border: "1px solid rgba(0, 255, 194, 0.08)"
         }}>
-           <ShieldCheck size={20} color="#00FFC2"/>
-           <div>
-             <div style={{ fontSize: "13px", fontWeight: "700", color: "#f8fafc" }}>SECURE CLOUD</div>
-             <div style={{ fontSize: "11px", color: "#00B8FF", textTransform: "uppercase", marginTop: "2px", fontWeight: "600", letterSpacing: "0.5px" }}>
-               {user?.role} Access
-             </div>
-           </div>
+          <div style={{
+            width: "32px", height: "32px",
+            background: "linear-gradient(135deg, #7B61FF 0%, #00B8FF 100%)",
+            borderRadius: "50%",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#fff", fontWeight: "800", fontSize: "13px",
+            flexShrink: 0,
+            boxShadow: "0 0 12px rgba(123, 97, 255, 0.3)"
+          }}>
+            {user?.name?.substring(0, 2).toUpperCase() || "U"}
+          </div>
+          <div style={{ overflow: "hidden" }}>
+            <div style={{ fontSize: "13px", fontWeight: "700", color: "#f1f5f9", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {user?.name || "User"}
+            </div>
+            <div style={{ fontSize: "11px", color: "#00FFC2", fontWeight: "600", textTransform: "capitalize" }}>
+              {user?.role}
+            </div>
+          </div>
         </div>
       </div>
     </aside>
