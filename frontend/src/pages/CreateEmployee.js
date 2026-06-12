@@ -1,137 +1,83 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+const card = { background: "rgba(18,25,38,0.5)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" };
+const labelSt = { display: "block", marginBottom: "8px", fontSize: "13px", fontWeight: 700, color: "#94a3b8" };
+const inputSt = { width: "100%", padding: "12px 16px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "14px", fontSize: "14px", boxSizing: "border-box", outline: "none", color: "#f1f5f9", fontFamily: "'Outfit', sans-serif", transition: "border-color 0.2s, box-shadow 0.2s" };
+const inF = (e) => { e.target.style.borderColor = "#00FFC2"; e.target.style.boxShadow = "0 0 0 4px rgba(0,255,194,0.08)"; };
+const inB = (e) => { e.target.style.borderColor = "rgba(255,255,255,0.08)"; e.target.style.boxShadow = "none"; };
+
 function CreateEmployee() {
-
   const [departments, setDepartments] = useState([]);
+  const [formData, setFormData] = useState({ name: "", email: "", department_id: "" });
+  const [loading, setLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    department_id: "",
-  });
-
-  useEffect(() => {
-
-    fetchDepartments();
-
-  }, []);
+  useEffect(() => { fetchDepartments(); }, []);
 
   const fetchDepartments = async () => {
-
-    try {
-
-      const res = await axios.get(
-        "http://localhost:5000/api/employee/departments"
-      );
-
-      setDepartments(res.data);
-
-    } catch (err) {
-
-      console.log(err);
-
-    }
+    try { const res = await axios.get("http://localhost:5000/api/employee/departments"); setDepartments(res.data); }
+    catch (err) { console.log(err); }
   };
 
-  const handleChange = (e) => {
-
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
-
     try {
-console.log(formData);
-      const res = await axios.post(
-        "http://localhost:5000/api/employee/employees",
-        formData
-      );
-
-      alert(res.data.message);
-
-      setFormData({
-        name: "",
-        email: "",
-        department_id: "",
-      });
-
+      setLoading(true);
+      const res = await axios.post("http://localhost:5000/api/employee/employees", formData);
+      alert(res.data.message || "Employee created successfully");
+      setFormData({ name: "", email: "", department_id: "" });
     } catch (err) {
-
-      console.log(err);
-
-      alert("Error adding employee");
-
+      console.log(err); alert("Error adding employee");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: "40px" }}>
+    <div style={{ fontFamily: "'Outfit', sans-serif", paddingBottom: "40px" }}>
+      <div style={{ ...card, padding: "28px 32px", marginBottom: "24px", background: "linear-gradient(135deg, rgba(0,255,194,0.1) 0%, rgba(0,184,255,0.08) 100%)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: "#f1f5f9" }}>Create Employee</h2>
+          <p style={{ margin: "6px 0 0", color: "#64748b", fontSize: "14px" }}>Add a new member to the organisation</p>
+        </div>
+        <div style={{ fontSize: "40px" }}>👤</div>
+      </div>
 
-      <h1>Create Employee</h1>
+      <div style={{ ...card, padding: "32px", maxWidth: "600px" }}>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "20px" }}>
+            <label style={labelSt}>Employee Name</label>
+            <input type="text" name="name" placeholder="John Doe" value={formData.name} onChange={handleChange} style={inputSt} onFocus={inF} onBlur={inB} required />
+          </div>
 
-      <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: "20px" }}>
+            <label style={labelSt}>Email Address</label>
+            <input type="email" name="email" placeholder="john@company.com" value={formData.email} onChange={handleChange} style={inputSt} onFocus={inF} onBlur={inB} required />
+          </div>
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Enter Name"
-          value={formData.name}
-          onChange={handleChange}
-        />
+          <div style={{ marginBottom: "32px" }}>
+            <label style={labelSt}>Department</label>
+            <select name="department_id" value={formData.department_id} onChange={handleChange} style={{ ...inputSt, cursor: "pointer", appearance: "none" }} onFocus={inF} onBlur={inB} required>
+              <option value="" style={{ background: "#121926" }}>Select Department</option>
+              {departments.map((dept) => <option key={dept.id} value={dept.id} style={{ background: "#121926" }}>{dept.department_name}</option>)}
+            </select>
+          </div>
 
-        <br />
-        <br />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter Email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-
-        <br />
-        <br />
-
-        <select
-          name="department_id"
-          value={formData.department_id}
-          onChange={handleChange}
-        >
-
-          <option value="">
-            Select Department
-          </option>
-
-          {departments.map((dept) => (
-
-            <option
-              key={dept.id}
-              value={dept.id}
-            >
-              {dept.department_name}
-            </option>
-
-          ))}
-
-        </select>
-
-        <br />
-        <br />
-
-        <button type="submit">
-          Add Employee
-        </button>
-
-      </form>
-
+          <button type="submit" disabled={loading} style={{
+            width: "100%", background: loading ? "rgba(255,255,255,0.1)" : "linear-gradient(135deg, #00FFC2 0%, #00B8FF 100%)",
+            color: loading ? "#64748b" : "#080B13", border: "none", borderRadius: "50px", padding: "16px",
+            fontSize: "15px", fontWeight: 800, cursor: loading ? "not-allowed" : "pointer",
+            boxShadow: loading ? "none" : "0 4px 20px rgba(0,255,194,0.3)", transition: "transform 0.2s, box-shadow 0.2s"
+          }}
+          onMouseEnter={(e) => { if (!loading) { e.currentTarget.style.transform = "scale(1.02)"; e.currentTarget.style.boxShadow = "0 6px 28px rgba(0,255,194,0.45)"; } }}
+          onMouseLeave={(e) => { if (!loading) { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,255,194,0.3)"; } }}
+          >
+            {loading ? "Adding..." : "Add Employee"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

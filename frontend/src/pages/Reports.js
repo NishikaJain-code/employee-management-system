@@ -1,241 +1,122 @@
 import { useEffect, useState } from "react";
 import api from "../utils/api";
 
+const card = { background: "rgba(18,25,38,0.5)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderRadius: "24px", border: "1px solid rgba(255,255,255,0.05)", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" };
+const inputSt = { padding: "10px 14px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "14px", fontSize: "13px", boxSizing: "border-box", outline: "none", color: "#f1f5f9", fontFamily: "'Outfit', sans-serif" };
+
 function Reports() {
-  const [tab, setTab]         = useState("employees");
-  const [data, setData]       = useState([]);
-  const [total, setTotal]     = useState(0);
+  const [tab, setTab] = useState("employees");
+  const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-
-  // Filters
-  const [search, setSearch]   = useState("");
-  const [status, setStatus]   = useState("");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
   const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate]   = useState("");
+  const [toDate, setToDate] = useState("");
 
-  useEffect(() => {
-    fetchReport();
-  }, [tab]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchReport(); }, [tab]);
 
   const fetchReport = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (search)   params.append("search",    search);
-      if (status)   params.append("status",    status);
+      if (search) params.append("search", search);
+      if (status) params.append("status", status);
       if (fromDate) params.append("from_date", fromDate);
-      if (toDate)   params.append("to_date",   toDate);
+      if (toDate) params.append("to_date", toDate);
 
       const res = await api.get(`/api/reports/${tab}?${params.toString()}`);
-      setData(res.data.report || []);
-      setTotal(res.data.total || 0);
-    } catch (err) {
-      console.error("Fetch report error:", err);
-      alert("Error loading report. Ensure you are logged in as Admin/HR.");
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
+      setData(res.data.report || []); setTotal(res.data.total || 0);
+    } catch (err) { console.error(err); alert("Error loading report. Ensure you are Admin/HR."); setData([]); }
+    finally { setLoading(false); }
   };
 
   const exportCSV = async () => {
     try {
       const res = await api.get(`/api/reports/export/csv?type=${tab}`, { responseType: "blob" });
       const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `${tab}_report_${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (err) {
-      console.error("CSV export error:", err);
-      alert("Error exporting CSV.");
-    }
+      const link = document.createElement("a"); link.href = url; link.setAttribute("download", `${tab}_report_${Date.now()}.csv`);
+      document.body.appendChild(link); link.click(); link.remove();
+    } catch (err) { console.error(err); alert("Error exporting CSV."); }
   };
 
-  const tabStyle = (active) => ({
-    padding: "10px 22px",
-    border: "none",
-    borderRadius: "10px",
-    cursor: "pointer",
-    fontWeight: 600,
-    fontSize: "14px",
-    background: active ? "linear-gradient(135deg,#f093fb,#f5576c)" : "#fff",
-    color: active ? "#fff" : "#555",
-    boxShadow: active ? "0 4px 12px rgba(245,87,108,0.3)" : "none",
-    transition: "all 0.2s",
-  });
+  const tabStyle = (active) => ({ padding: "10px 20px", border: active ? "1px solid rgba(255,0,229,0.3)" : "1px solid rgba(255,255,255,0.05)", borderRadius: "50px", cursor: "pointer", fontWeight: 700, fontSize: "14px", background: active ? "rgba(255,0,229,0.1)" : "rgba(255,255,255,0.02)", color: active ? "#FF00E5" : "#94a3b8", transition: "all 0.2s", fontFamily: "'Outfit', sans-serif" });
 
-  // Column definitions per report type
   const columns = {
     employees: ["full_name", "email", "role", "designation", "department_name", "phone", "salary", "joined_at"],
-    leaves:    ["employee_name", "leave_name", "from_date", "to_date", "total_days", "status", "department_name", "applied_at"],
-    assets:    ["asset_name", "type", "serial_number", "asset_status", "assigned_to", "department_name", "assigned_date"],
+    leaves: ["employee_name", "leave_name", "from_date", "to_date", "total_days", "status", "department_name", "applied_at"],
+    assets: ["asset_name", "type", "serial_number", "asset_status", "assigned_to", "department_name", "assigned_date"],
   };
 
   const formatCell = (key, val) => {
     if (val === null || val === undefined) return "—";
-    if (key.includes("date") || key.includes("at")) {
-      try { return new Date(val).toLocaleDateString(); } catch { return val; }
-    }
+    if (key.includes("date") || key.includes("at")) { try { return new Date(val).toLocaleDateString(); } catch { return val; } }
     if (key === "salary") return `₹${Number(val).toLocaleString("en-IN")}`;
-    if (key === "status") {
-      const colors = { Approved: "#38a169", Rejected: "#e53e3e", Pending: "#d69e2e", Available: "#38a169", Assigned: "#3182ce" };
-      return (
-        <span style={{
-          background: colors[val] ? colors[val] + "22" : "#f7fafc",
-          color: colors[val] || "#718096",
-          padding: "2px 10px", borderRadius: "20px", fontWeight: 600, fontSize: "12px"
-        }}>{val}</span>
-      );
+    if (key === "status" || key === "asset_status") {
+      const colors = { Approved: { bg: "rgba(0,255,194,0.1)", c: "#00FFC2" }, Rejected: { bg: "rgba(255,61,113,0.1)", c: "#FF3D71" }, Pending: { bg: "rgba(255,184,0,0.1)", c: "#FFB800" }, Available: { bg: "rgba(0,255,194,0.1)", c: "#00FFC2" }, Assigned: { bg: "rgba(0,184,255,0.1)", c: "#00B8FF" } };
+      const c = colors[val] || { bg: "rgba(255,255,255,0.05)", c: "#94a3b8" };
+      return <span style={{ background: c.bg, color: c.c, border: `1px solid ${c.c}30`, padding: "4px 12px", borderRadius: "50px", fontWeight: 700, fontSize: "12px", whiteSpace: "nowrap" }}>{val}</span>;
     }
     return String(val);
   };
 
-  const formatHeader = (key) =>
-    key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+  const formatHeader = (key) => key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 
   return (
-    <div style={{ padding: "32px", fontFamily: "'Segoe UI', sans-serif", background: "#f0f4ff", minHeight: "100vh" }}>
-
-      {/* Header */}
-      <div style={{
-        background: "linear-gradient(135deg,#f093fb,#f5576c)",
-        borderRadius: "16px",
-        padding: "24px 28px",
-        color: "#fff",
-        marginBottom: "28px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}>
+    <div style={{ fontFamily: "'Outfit', sans-serif", paddingBottom: "40px" }}>
+      <div style={{ ...card, padding: "28px 32px", marginBottom: "24px", background: "linear-gradient(135deg, rgba(255,0,229,0.1) 0%, rgba(123,97,255,0.08) 100%)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "20px" }}>
         <div>
-          <h2 style={{ margin: 0 }}>📊 Reporting Module</h2>
-          <p style={{ margin: "6px 0 0", opacity: 0.85 }}>Generate and export enterprise reports</p>
+          <h2 style={{ margin: 0, fontSize: "24px", fontWeight: 800, color: "#f1f5f9" }}>Reporting Module</h2>
+          <p style={{ margin: "6px 0 0", color: "#64748b", fontSize: "14px" }}>Generate and export enterprise reports</p>
         </div>
-        <button
-          onClick={exportCSV}
-          style={{
-            background: "rgba(255,255,255,0.2)",
-            color: "#fff",
-            border: "2px solid rgba(255,255,255,0.5)",
-            padding: "10px 20px",
-            borderRadius: "10px",
-            cursor: "pointer",
-            fontWeight: 700,
-            fontSize: "14px",
-          }}
-        >
-          ⬇️ Export CSV
-        </button>
+        <button onClick={exportCSV} style={{ background: "rgba(255,0,229,0.1)", color: "#FF00E5", border: "1px solid rgba(255,0,229,0.2)", padding: "12px 24px", borderRadius: "50px", cursor: "pointer", fontWeight: 700, fontSize: "13px", fontFamily: "'Outfit', sans-serif", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.background = "#FF00E5"; e.currentTarget.style.color = "#fff"; }} onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,0,229,0.1)"; e.currentTarget.style.color = "#FF00E5"; }}>⬇️ Export CSV</button>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+      <div style={{ display: "flex", gap: "12px", marginBottom: "24px", flexWrap: "wrap", ...card, padding: "16px", borderRadius: "100px" }}>
         <button style={tabStyle(tab === "employees")} onClick={() => { setTab("employees"); setData([]); }}>👥 Employees</button>
-        <button style={tabStyle(tab === "leaves")}    onClick={() => { setTab("leaves");    setData([]); }}>📋 Leaves</button>
-        <button style={tabStyle(tab === "assets")}    onClick={() => { setTab("assets");    setData([]); }}>💻 Assets</button>
+        <button style={tabStyle(tab === "leaves")} onClick={() => { setTab("leaves"); setData([]); }}>📋 Leaves</button>
+        <button style={tabStyle(tab === "assets")} onClick={() => { setTab("assets"); setData([]); }}>💻 Assets</button>
       </div>
 
-      {/* Filters */}
-      <div style={{
-        background: "#fff",
-        borderRadius: "14px",
-        padding: "16px 20px",
-        marginBottom: "20px",
-        display: "flex",
-        gap: "12px",
-        alignItems: "center",
-        flexWrap: "wrap",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
-      }}>
-        {tab === "employees" && (
-          <input
-            placeholder="🔍 Search by name or email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "13px", flex: 1, minWidth: "200px" }}
-          />
-        )}
-
+      <div style={{ ...card, padding: "20px 24px", marginBottom: "24px", display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
+        {tab === "employees" && <input placeholder="🔍 Search by name or email..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ ...inputSt, flex: 1, minWidth: "200px" }} />}
         {tab === "leaves" && (
           <>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "13px" }}
-            >
-              <option value="">All Status</option>
-              <option value="Pending">Pending</option>
-              <option value="Approved">Approved</option>
-              <option value="Rejected">Rejected</option>
+            <select value={status} onChange={(e) => setStatus(e.target.value)} style={{ ...inputSt, cursor: "pointer", appearance: "none" }}>
+              <option value="" style={{ background: "#121926" }}>All Status</option>
+              <option value="Pending" style={{ background: "#121926" }}>Pending</option>
+              <option value="Approved" style={{ background: "#121926" }}>Approved</option>
+              <option value="Rejected" style={{ background: "#121926" }}>Rejected</option>
             </select>
-            <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
-              style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "13px" }} />
-            <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)}
-              style={{ padding: "8px 12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "13px" }} />
+            <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} style={{ ...inputSt, colorScheme: "dark" }} />
+            <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} style={{ ...inputSt, colorScheme: "dark" }} />
           </>
         )}
-
-        <button
-          onClick={fetchReport}
-          style={{
-            padding: "8px 18px", borderRadius: "8px", border: "none",
-            background: "linear-gradient(135deg,#f093fb,#f5576c)",
-            color: "#fff", fontWeight: 600, cursor: "pointer", fontSize: "13px"
-          }}
-        >
-          🔄 Apply
-        </button>
-
-        <span style={{ marginLeft: "auto", fontSize: "13px", color: "#888" }}>
-          {total} record(s) found
-        </span>
+        <button onClick={fetchReport} style={{ padding: "10px 24px", borderRadius: "50px", border: "none", background: "linear-gradient(135deg, #FF00E5, #7B61FF)", color: "#fff", fontWeight: 800, cursor: "pointer", fontSize: "14px", fontFamily: "'Outfit', sans-serif" }}>🔄 Apply</button>
+        <span style={{ marginLeft: "auto", fontSize: "13px", color: "#64748b", fontWeight: 600 }}>{total} record(s) found</span>
       </div>
 
-      {/* Table */}
-      {loading ? (
-        <p style={{ textAlign: "center", color: "#f5576c" }}>⏳ Generating report...</p>
-      ) : (
-        <div style={{
-          background: "#fff",
-          borderRadius: "16px",
-          overflow: "auto",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-          maxHeight: "65vh",
-        }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", minWidth: "700px" }}>
-            <thead style={{ position: "sticky", top: 0 }}>
-              <tr style={{ background: "#fff0f3" }}>
-                <th style={{ padding: "12px 14px", textAlign: "left", color: "#555", fontWeight: 600 }}>#</th>
-                {(columns[tab] || []).map((col) => (
-                  <th key={col} style={{ padding: "12px 14px", textAlign: "left", color: "#555", fontWeight: 600, whiteSpace: "nowrap" }}>
-                    {formatHeader(col)}
-                  </th>
+      {loading ? <p style={{ textAlign: "center", color: "#FF00E5", fontWeight: 700 }}>⏳ Generating report...</p> : (
+        <div style={{ ...card, overflow: "hidden" }}>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px", minWidth: "700px" }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                  <th style={{ padding: "16px", textAlign: "left", color: "#64748b", fontWeight: 700 }}>#</th>
+                  {(columns[tab] || []).map((col) => <th key={col} style={{ padding: "16px", textAlign: "left", color: "#64748b", fontWeight: 700, whiteSpace: "nowrap", textTransform: "uppercase", fontSize: "12px", letterSpacing: "0.5px" }}>{formatHeader(col)}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((row, i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }} onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.02)"} onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}>
+                    <td style={{ padding: "12px 16px", color: "#64748b" }}>{i + 1}</td>
+                    {(columns[tab] || []).map((col) => <td key={col} style={{ padding: "12px 16px", color: "#f1f5f9", fontWeight: 600 }}>{formatCell(col, row[col])}</td>)}
+                  </tr>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((row, i) => (
-                <tr key={i} style={{ borderBottom: "1px solid #eee", background: i % 2 === 0 ? "#fff" : "#fefefe" }}>
-                  <td style={{ padding: "10px 14px", color: "#bbb", fontSize: "12px" }}>{i + 1}</td>
-                  {(columns[tab] || []).map((col) => (
-                    <td key={col} style={{ padding: "10px 14px", color: "#2d3748" }}>
-                      {formatCell(col, row[col])}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-              {data.length === 0 && (
-                <tr>
-                  <td colSpan={(columns[tab] || []).length + 1} style={{ textAlign: "center", padding: "40px", color: "#aaa" }}>
-                    📭 No data found. Try adjusting filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                {data.length === 0 && <tr><td colSpan={(columns[tab] || []).length + 1} style={{ textAlign: "center", padding: "40px", color: "#64748b" }}>No data found. Try adjusting filters.</td></tr>}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
