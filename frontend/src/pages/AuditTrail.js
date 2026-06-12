@@ -12,7 +12,7 @@ function AuditTrail() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ table_name: "", action: "" });
   const LIMIT = 15;
-
+// eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchLogs(); }, [page, filter]);
 
   const fetchLogs = async () => {

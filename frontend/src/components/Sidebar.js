@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard, Users, UserCircle, Upload, 
   FileCheck, ShieldCheck, Database, Briefcase, 
-  ClipboardList, Activity, Box, BarChart3, Bell
+  ClipboardList, Box, BarChart3, 
 } from "lucide-react";
 
 function Sidebar({ user }) {
@@ -40,12 +40,7 @@ function Sidebar({ user }) {
   ];
 
   // Group nav items visually
-  const sections = [
-    { label: "Main", items: navItems.slice(0, 3) },
-    { label: "Workflow", items: navItems.slice(3, navItems.length - 2) },
-    { label: "Data", items: navItems.slice(navItems.length - 2) },
-  ].filter(s => s.items.length > 0);
-
+  
   return (
     <aside style={{
       width: "260px",

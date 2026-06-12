@@ -14,7 +14,7 @@ function Reports() {
   const [status, setStatus] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-
+// eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { fetchReport(); }, [tab]);
 
   const fetchReport = async () => {
